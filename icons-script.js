@@ -14,7 +14,7 @@
 
 var $ = window.jQuery; 
 
-var mapLink = "https://docs.google.com/drawings/d/1ZGBwTTrY5ATlJOWrPnwH2qWkee7kgdRTnTDPVHYZ3Ak/edit?usp=sharing";
+var mapLink = "https://imgur.com/ZuUibeV";
 var changelogLink = "viewChangelog()";
 
 var greenFilter = "-webkit-filter: hue-rotate(50deg)";
