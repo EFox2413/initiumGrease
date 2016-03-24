@@ -5,6 +5,7 @@
 // @description  try to take over the world!
 // @author       EFox2413
 // @match        https://www.playinitium.com/*
+// @match        http://www.playinitium.com/*
 // @grant        none
 // ==/UserScript==
 /* jshint -W097 */
