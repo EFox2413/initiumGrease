@@ -4,6 +4,7 @@
 // @version      0.1
 // @author       EFox2413
 // @match       https://www.playinitium.com/*
+// @match       http://www.playinitium.com/*
 // @grant        none
 // ==/UserScript==
 /* jshint -W097 */
