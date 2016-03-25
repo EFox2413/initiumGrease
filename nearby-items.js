@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         nearby-items
 // @namespace    https://github.com/EFox2413
-// @version      0.11
-// @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/nearby-items.js
-// @author       EFox2413
+// @version      0.1.1
+// @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/version/nearby-items.js
+// @downloadURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/version/nearby-items.js
+// @supportURL      https://github.com/EFox2413/initiumGrease/issues
 // @match        https://www.playinitium.com/*
 // @match        http://www.playinitium.com/*
 // @grant        none

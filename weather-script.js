@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         WeatherScript
+// @name         weather-script
 // @namespace    https://github.com/EFox2413/initiumGrease
-// @version      0.11
-// @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js
-// @description  try to take over the world!
-// @author       EFox2413
+// @version      0.1.1
+// @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/version/weather-script.js
+// @downloadURL https://raw.githubusercontent.com/EFox2413/initiumGrease/version/weather-script.js
+// @supportURL      https://github.com/EFox2413/initiumGrease/issues
 // @match       https://www.playinitium.com/*
 // @match       http://www.playinitium.com/*
 // @grant        none
