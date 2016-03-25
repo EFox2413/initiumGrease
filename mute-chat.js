@@ -2,8 +2,8 @@
 // @name         mute-chat
 // @namespace    https://github.com/EFox2413
 // @version      0.1.1
-// @updateURL       https://raw.githubusercontent.com/EFox2413/initiumGrease/version/mute-chat.js
-// @downloadURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/version/mute-chat.js
+// @updateURL       https://raw.githubusercontent.com/EFox2413/initiumGrease/master/mute-chat.js
+// @downloadURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/mute-chat.js
 // @supportURL      https://github.com/EFox2413/initiumGrease/issues
 // @match        https://www.playinitium.com/*
 // @match        http://www.playinitium.com/*
