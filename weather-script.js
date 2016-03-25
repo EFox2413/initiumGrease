@@ -3,6 +3,7 @@
 // @namespace    https://github.com/EFox2413/initiumGrease
 // @version      0.11
 // @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js
+// @downloadURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js
 // @description  try to take over the world!
 // @author       EFox2413
 // @match       https://www.playinitium.com/*
