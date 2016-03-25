@@ -1,11 +1,10 @@
 // ==UserScript==
-// @name         Display Stats
+// @name         display-stats
 // @namespace    https://github.com/EFox2413/initiumGrease
-// @version      0.11
+// @version      0.1.1
 // @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/display-stats.js
-// @downloadURL  https://raw.githubusercontent.com/EFox2413/initiumGrease/master/display-stats.js
-// @description  try to take over the world!
-// @author       EFox2413
+// @downloadURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/display-stats.js
+// @supportURL      https://github.com/EFox2413/initiumGrease/issues
 // @match        https://www.playinitium.com/*
 // @match        http://www.playinitium.com/*
 // @grant        none
