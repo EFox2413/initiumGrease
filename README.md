@@ -1,14 +1,14 @@
 # Initium Grease
-Greasemonkey/Tampermonkey scripts for the html-based game Initium hosted at https://www.playinitium.com
+[Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)/[Tampermonkey](http://tampermonkey.net/) scripts for the html-based game [Initium](https://www.playinitium.com)
 
 ## Last Edited 3/24/16
 Status: 
--  :white_check_mark: weather-script
--  :white_check_mark: display-stats
--  :white_check_mark: icons-script
--  :white_check_mark: mute-chat
--  :heavy_exclamation_mark: nearby-items
--  :heavy_exclamation_mark: no-refresh
+-  :white_check_mark: [weather-script](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js)
+-  :white_check_mark: [display-stats](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/display-stats.js)
+-  :white_check_mark: [icons-script](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/icons-script.js)
+-  :white_check_mark: [mute-chat](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/mute-chat.js)
+-  :heavy_exclamation_mark: [nearby-items](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/nearby-items.js)
+-  :heavy_exclamation_mark: [no-refresh](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/no-refresh.js)
 
 ## weather-script
 Script that displays the weather forecast for the current hour and for the next hour.
