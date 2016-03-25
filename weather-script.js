@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         weather-script
 // @namespace    https://github.com/EFox2413/initiumGrease
-// @version      0.1.1
+// @version      0.1.1.1
 // @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js
 // @downloadURL https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js
 // @supportURL      https://github.com/EFox2413/initiumGrease/issues
@@ -16,7 +16,7 @@ var $ = window.jQuery;
 
 // Weather ratio from getWeather function in server js file...
 var weatherInt = getWeather();
-var lightning = getLightning();
+var lightning = processLightning();
 var nextWeatherInt = getNextWeather();
 var nextLightning = getNextLightning();
 
