@@ -6,7 +6,7 @@ Status:
 -  :white_check_mark: weather-script
 -  :white_check_mark: display-stats
 -  :white_check_mark: icons-script
--  :warning: mute-chat
+-  :white_check_mark: mute-chat
 -  :heavy_exclamation_mark: nearby-items
 -  :heavy_exclamation_mark: no-refresh
 
