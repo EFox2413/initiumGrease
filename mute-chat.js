@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         mute-chat
 // @namespace    https://github.com/EFox2413
-// @version      0.1
+// @version      0.11
+// @update       https://raw.githubusercontent.com/EFox2413/initiumGrease/master/mute-chat.js
 // @author       EFox2413
 // @match        https://www.playinitium.com/*
 // @match        http://www.playinitium.com/*
