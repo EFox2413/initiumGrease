@@ -68,19 +68,29 @@ function myMessage( id ) {
 }
 
 
-messager.onChatMessage = function(chatMessage) {
-    // check if sender's name is on ban list
-    console.log(chatMessage.nickname + ", banned: " + checkNameOnBanList(chatMessage.nickname)); 
+function getNickName(name) {
+    name = name.replace(/<()[^<]+>/g,"");
+    return name;
+}
 
-    if (checkNameOnBanList(chatMessage.nickname) == true) {
+messager.onChatMessage = function(chatMessage) {
+	var nName = getNickName(chatMessage.nickname);
+	console.log("nName: " + nName);
+    // check if sender's name is on ban list
+  //  console.log(chatMessage.nickname + ", banned: " + checkNameOnBanList(chatMessage.nickname)); 
+
+    if (checkNameOnBanList(nName) == true) {
         //        console.log("message surpressed, exit function");
         return;
     }
 
     // check if mute command is sent
     if (chatMessage.message.startsWith('/mute ')) {
+		// Am I the sender of the message?
         if ( myMessage(chatMessage.characterId )) {
-            if ( chatMessage.nickname != chatMessage.message.substring(6) ) {
+			// Don't let me mute myself, while funny it prevents any mute and unmute functionality
+			//    Meaning that if I mute myself I will be unable to unmute myself or mute anyone else
+            if ( nName != chatMessage.message.substring(6) ) {
                 addBan(chatMessage.message.substring(6));
             }
         }
