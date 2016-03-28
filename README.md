@@ -28,9 +28,13 @@ Mutes specificed playrs in the chatbox via command /mute <playername>
 Tracks your stats for each attack performed
 ### Documentation
   On attack button click, the script will record your previous stats and previous attack number in a database.
+  
   To see all of the attacks and stats recorded you can press the (~) key and they will print to the console.
+  
   To see the console you need to right click the web page and click on inspect.
+  
   The script's name should be specific to the character you are using it with
+  
   e.g. If my name was troll I would name the script troll-stats
 
 ## nearby-items
