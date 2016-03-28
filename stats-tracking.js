@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stats-tracking
 // @namespace    https://github.com/EFox2413/initiumGrease
-// @version      0.1.0
+// @version      0.1.1
 // @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/icons-script.js
 // @downloadURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/icons-script.js
 // @supportURL      https://github.com/EFox2413/initiumGrease/issues
@@ -38,27 +38,29 @@ function checkForSameChar() {
 
 // Determine if Attack button was pressed
 if ( clickOnceOnly === 0 ) {
-	atkButtons.click(function (event) {
-		// increment clickOnce counter
-		clickOnceOnly++;
-		
-		$.ajax({
-			url: href,
-			type: "GET",
-
-			success: function(charPage) {
-				var statsDiv = $(charPage).find('.main-item-subnote');
-				var stats = "";
-
-				statsDiv.each(function( index ) {
-					if ( index > 0  && index < 4) {
-						stats += $( this ).text().split(" ")[0] + "  ";
-					}
-				});
-				GM_setValue(nameStr, stats);
-			}
+	if ( atkButtons.attr( 'href' ).includes( 'attack' ) ) {
+		atkButtons.click(function (event) {
+			// increment clickOnce counter
+			clickOnceOnly++;
+			
+			$.ajax({
+				url: href,
+				type: "GET",
+	
+				success: function(charPage) {
+					var statsDiv = $(charPage).find('.main-item-subnote');
+					var stats = "";
+	
+					statsDiv.each(function( index ) {
+						if ( index > 0  && index < 4) {
+							stats += $( this ).text().split(" ")[0] + "  ";
+						}
+					});
+					GM_setValue(nameStr, stats);
+				}
+			});
 		});
-	});
+	}
 }
 
 // If you press the tilde key (Shift + grave accent)
