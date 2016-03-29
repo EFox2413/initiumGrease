@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         weather-script
 // @namespace    https://github.com/EFox2413/initiumGrease
-// @version      0.1.1.1
+// @version      0.1.1.2
 // @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js
 // @downloadURL https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js
 // @supportURL      https://github.com/EFox2413/initiumGrease/issues
@@ -33,17 +33,19 @@ function translateToString(wRatio, LRatio) {
     return "N/A";
 }
 
-$( '.header-location' ).append(  '<span> ' + "       Now: " +  translateToString(weatherInt, lightning) + '<//span>' );
-$( '.header-location' ).append(  '<span> ' + "       Next: " +  translateToString(nextWeatherInt, nextLightning) + '<//span>' );
+$( '.header-location' ).append(  '<span ' + getColor() + '> ' + "       Now: " +  translateToString(weatherInt, processLightning) + '<//span>' );
+$( '.header-location' ).append(  '<span ' + getColor() + '> ' + "       Next: " +  translateToString(nextWeatherInt, getNextLightning) + '<//span>' );
 
-
+// returns a color for the string based on whether it's night time or day time
+function getColor() {
+	if (checkNight()) return 'style="color:purple"';
+	return 'style="color:yellow"';
+}
 
 // Weather calculator
 function getNextWeather()
 {
-	// <%=GameUtils.getWeather()%>
 	var serverTime = getCurrentServerTime();
-	
 	var date = new Date(serverTime);
 	
 	var behindHour = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()+1);
@@ -51,11 +53,9 @@ function getNextWeather()
 	var behindMs = behindHour.getTime();
 	var aheadMs = aheadHour.getTime();
 
-	
 	var behindHourWeather = rnd((behindMs/3600000), 0, 1);
 	var aheadHourWeather = rnd((aheadMs/3600000), 0, 1);
 	
-	// Now interpolate...
 	var weatherDifference = aheadHourWeather-behindHourWeather;
 	
 	var hourProgression = (serverTime-behindHour)/3600000;
@@ -83,4 +83,12 @@ function getNextLightning()
 		return lightLevel;
 	}
 	return 0;
+}
+
+function checkNight() {
+	var randConstant = 318.47133757961783439490445859873;
+	var serverTime = getCurrentServerTime() / (randConstant*60*60*1.5); 
+	var amount = Math.abs(Math.sin(serverTime)) * 3.0 - 1.56;
+	
+	return amount > 1;
 }
