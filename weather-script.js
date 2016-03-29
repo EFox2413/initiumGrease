@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         weather-script
 // @namespace    https://github.com/EFox2413/initiumGrease
-// @version      0.1.1.2
+// @version      0.1.1.3
 // @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js
 // @downloadURL https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js
 // @supportURL      https://github.com/EFox2413/initiumGrease/issues
@@ -28,6 +28,8 @@ function translateToString(wRatio, LRatio) {
         return"Rain";
 		}
     } else if (wRatio <0.5) {
+    	// It's not sunny at night...
+    	if (checkNight()) return "Clear";
         return "Sunny";
     }
     return "N/A";
