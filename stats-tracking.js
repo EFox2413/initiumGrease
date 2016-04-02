@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         stat-tracker
-// @version      0.2
+// @version      0.2.0.0
 // @match        https://www.playinitium.com/*
 // @match        http://www.playinitium.com/*
 // @grant        none
@@ -14,10 +14,8 @@
 
 var $ = window.jQuery;
 
-
 var characterName = $( '.character-display-box' ).children( 'div' ).children('a').first().text();
 
-jQuery.fn.reverse = [].reverse;
 var enabled = false;
 var saved = false;
 var prevStats = JSON.parse( GM_getValue(characterName, "[]") );
@@ -27,9 +25,13 @@ var href = $( '.character-display-box').children().first().attr( "rel" );
 var atkButtons =  $( '.main-buttonbox' ).children( 'a' ).slice(0,2);
 var clickOnceOnly = 0;
 
+var currentStats = getStats();
+
+jQuery.fn.reverse = [].reverse;
 
 //Check if character is enabled for tracking.
 var settings = JSON.parse( GM_getValue("initium_counter_settings", "[]") );
+
 settings.forEach(function(char) {
     console.log(char);
     if(char.name == characterName) {
@@ -57,9 +59,9 @@ if (enabled) {
 } else {
     var htmlString = '<div style="display:inline-block; cursor: pointer;" id="statCounter"><img style="padding: 0 0 3px;" src="https://s3.amazonaws.com/imappy/3d_bar_chart_off.png" border="0/"></div>'
 }
+
 $(".header-stats").prepend(htmlString)
 $("#statCounter").click(showTracker)
-
 
 //Function to toggle enabled/disabled for current character
 function toggleCounter() {
@@ -86,7 +88,6 @@ function toggleCounter() {
     GM_setValue("initium_counter_settings", JSON.stringify(settings))
 }
 
-
 //Add Stat Tracking logic
 function addTracking() {
     // Determine if Attack button was pressed
@@ -97,14 +98,11 @@ function addTracking() {
     }
 }
 
-function tracking() {
-    // increment clickOnce counter
-    clickOnceOnly++;
-
+//Gets the stats via ajax on pageload
+function getStats() {
     $.ajax({
         url: href,
         type: "GET",
-
         success: function(charPage) {
             var statsDiv = $(charPage).find('.main-item-subnote');
             var stats = dbLength+" ";
@@ -114,9 +112,18 @@ function tracking() {
                     stats += $( this ).text().split(" ")[0] + "  ";
                 }
             });
-            gm_store("stats", characterName, stats);
+            return stats;
         }
+    })
+    .fail(function() {
+        alert("stats retrieval failed; abort script");
     });
+}
+
+function tracking() {
+    // increment clickOnce counter
+    clickOnceOnly++;
+    gm_store("stats", characterName, currentStats);
 };
 
 function showTracker() {
@@ -145,9 +152,7 @@ function showTracker() {
 
 /*
  Some shortcuts.
-
  - Press | to show the stats saved for this character in a popup.
-
  */
 window.onkeypress = function( event ) {
     if (event.keyCode == 124) {
@@ -163,8 +168,8 @@ window.onkeypress = function( event ) {
 
 //Prints saved stats from database to console
 function printStats(){
-    console.log("Stats for "+characterName+":")
-    var savedStats = JSON.parse( GM_getValue(characterName, "[]") );
+    console.log("Stats for " + characterName + ":")
+    var savedStats = JSON.parse(GM_getValue(characterName, "[]"));
     savedStats.forEach(function(stat) {
         console.log(stat);
     });
@@ -190,8 +195,7 @@ function gm_store(dataname, charname, data) {
     }
 }
 
-function statTrackPopup(content)
-{
+function statTrackPopup(content) {
     exitFullscreenChat();
 
     currentPopupStackIndex++;
@@ -200,8 +204,7 @@ function statTrackPopup(content)
     $("#page-popup-root").append("<div id='"+pagePopupId+"'><div id='"+pagePopupId+"-content' class='page-popup'><img id='banner-loading-icon' src='javascript/images/wait.gif' border=0/></div><div class='page-popup-glass'></div><a class='page-popup-X' onclick='closePagePopup()'>X</a></div>");
     $("#"+pagePopupId+"-content").html(content);
 
-
-    if (currentPopupStackIndex==1)
+    if (currentPopupStackIndex === 1)
     {
         $(document).bind("keydown",function(e)
         {
