@@ -15,7 +15,7 @@
 /* jshint -W097 */
 'use strict';
 
-var $ = window.jQuery; 
+var $ = window.jQuery;
 
 var characterName = $( '.character-display-box' ).children( 'div' ).children('a').first().text();
 // this will track atk#
@@ -26,60 +26,66 @@ var href = $( '.character-display-box').children().first().attr( "rel" );
 var atkButtons =  $( '.main-buttonbox' ).children( 'a' ).slice(0,2);
 var clickOnceOnly = 0;
 
+// gets the character's current stats
+var characterStats = getStats();
+
 checkForSameChar();
 
 function checkForSameChar() {
-	var firstEntry = GM_listValues()[0];
-	
-	if ( (characterName.concat(0)) != firstEntry) {
-		alert("CharacterName detected as: " + characterName + "\n Database entry: " + firstEntry + "\n Character name does not match database name.\n Are you sure you want to continue using this script?");
-	}
+    var firstEntry = GM_listValues()[0];
+
+    if ( (characterName.concat(0)) != firstEntry) {
+        alert("CharacterName detected as: " + characterName + "\n Database entry: " +
+              firstEntry + "\n Character name does not match database name.\n Are " +
+              "you sure you want to continue using this script?");
+    }
+}
+
+function getStats() {
+    $.ajax({
+url: href,
+type: "GET",
+
+success: function(charPage) {
+var statsDiv = $(charPage).find('.main-item-subnote');
+var stats = "";
+
+statsDiv.each(function( index ) {
+    if ( index > 0  && index < 4) {
+    stats += $( this ).text().split(" ")[0] + "  ";
+    }
+    });
+return stats;
+}
+});
 }
 
 // Determine if Attack button was pressed
 if ( clickOnceOnly === 0 ) {
-	if ( atkButtons.attr( 'href' ).includes( 'attack' ) ) {
-		atkButtons.click(function (event) {
-			// increment clickOnce counter
-			clickOnceOnly++;
-			
-			$.ajax({
-				url: href,
-				type: "GET",
-	
-				success: function(charPage) {
-					var statsDiv = $(charPage).find('.main-item-subnote');
-					var stats = "";
-	
-					statsDiv.each(function( index ) {
-						if ( index > 0  && index < 4) {
-							stats += $( this ).text().split(" ")[0] + "  ";
-						}
-					});
-					GM_setValue(nameStr, stats);
-				}
-			});
-		});
-	}
+    if ( atkButtons.attr( 'href' ).includes( 'attack' ) ) {
+        atkButtons.click(function (event) {
+                // increment clickOnce counter
+                clickOnceOnly++;
+
+                GM_setValue(nameStr, characterStats);
+                });
+    }
 }
 
 // If you press the tilde key (Shift + grave accent)
 // The database will print to the console
 // Shown on inspect
 window.onkeypress = function( event ) {
-	if (event.keyCode == 126) {
-		printDatabase();
-	}
+    if (event.keyCode == 126) {
+        printDatabase();
+    }
 }
 
 // prints the database to console
 function printDatabase(){
-	var dbNames = GM_listValues();
-	
-	dbNames.forEach( function (entry) {
-		console.log(entry + ", " + GM_getValue(entry));
-	});
+    var dbNames = GM_listValues();
+
+    dbNames.forEach( function (entry) {
+            console.log(entry + ", " + GM_getValue(entry));
+            });
 }
-
-
-
