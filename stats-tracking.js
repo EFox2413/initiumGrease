@@ -29,46 +29,38 @@ var clickOnceOnly = 0;
 // gets the character's current stats
 var characterStats = getStats();
 
-checkForSameChar();
-
-function checkForSameChar() {
-    var firstEntry = GM_listValues()[0];
-
-    if ( (characterName.concat(0)) != firstEntry) {
-        alert("CharacterName detected as: " + characterName + "\n Database entry: " +
-              firstEntry + "\n Character name does not match database name.\n Are " +
-              "you sure you want to continue using this script?");
-    }
-}
-
+// ajax request to get current stats
 function getStats() {
     $.ajax({
-url: href,
-type: "GET",
+        url: href,
+        type: "GET",
 
-success: function(charPage) {
-var statsDiv = $(charPage).find('.main-item-subnote');
-var stats = "";
+        success: function(charPage) {
+            var statsDiv = $(charPage).find('.main-item-subnote');
+            var stats = "";
 
-statsDiv.each(function( index ) {
-    if ( index > 0  && index < 4) {
-    stats += $( this ).text().split(" ")[0] + "  ";
-    }
+            statsDiv.each(function( index ) {
+                if ( index > 0  && index < 4) {
+                    stats += $( this ).text().split(" ")[0] + "  ";
+                }
+            });
+            return stats;
+        }
+    })
+    // abort script if ajax request fails
+    .fail( function {
+        alert("stats retrieval failed, script cannot continue");
     });
-return stats;
-}
-});
 }
 
 // Determine if Attack button was pressed
 if ( clickOnceOnly === 0 ) {
     if ( atkButtons.attr( 'href' ).includes( 'attack' ) ) {
         atkButtons.click(function (event) {
-                // increment clickOnce counter
-                clickOnceOnly++;
+            clickOnceOnly++;
 
-                GM_setValue(nameStr, characterStats);
-                });
+            GM_setValue(nameStr, characterStats);
+        });
     }
 }
 
