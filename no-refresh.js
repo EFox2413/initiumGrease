@@ -14,6 +14,8 @@
 
 var $ = window.jQuery;
 
+$( '.main-page' ).last().append( '<div class="combat-text"> </div>' );
+
 var buttonRight = $( '.main-button' ).first();
 var buttonLeft = $( '.main-button' ).first().next();
 
@@ -64,39 +66,26 @@ function processData(data) {
 
     // data is processed, now update the relevant divs
     updateCombat(playerHP, enemyHP, combatHTML);
-
-    // TODO REMOVE
-    console.log(playerHP + ", " + enemyHP + "\n html: " + combatHTML);
 }
-
-
-// TODO smarter way of updating the hpObjects
-/*
-// this gets the player hp div
-html = html.slice(html.indexOf( "<div style=\"display:inline-block;\">",
-                  html.indexOf( "<div class=\"buff-pane hint"));
-
-// this gets the enemy div
-html = html.slice(html.indexOf( "<div class=\"character-display-box\"\ style=\"float:right",
-                  html.indexOf( "<div calss=\"chat_box"));
- */
 
 // parses HTML and gets the combat related HTML
 function parseCombatHTML( html ){
-    html = html.slice(html.indexOf( "<p" ));
-
-    console.log( html );
+    html = html.slice(html.indexOf( "<p>\n\t" ));
     return html;
 }
 
 // updates the HTML elements on the current page with the values
 function updateCombat(newPlayerHP, newEnemyHP, combatHTML) {
-    var $hpObj = $( '.character-display-box' ).children( 'div' ).children( 'div' ).children( 'p' );
-    var playerHP = $hpObj.first();
-    var enemyHP = $hpObj.last();
+    var $hpObj = $( '.character-display-box' ).children( 'div' ).children( 'div' );
+    var playerHP = $hpObj.children( 'p' ).first();
+    var enemyHP = $hpObj.children( 'p' ).last();
+    var newPlayerHPBarWidth = parseInt(parseFloat(newPlayerHP) / parseFloat( newPlayerHP.slice(newPlayerHP.indexOf("/") + 1)) * 100);
+    var newEnemyHPBarWidth = parseInt(parseFloat(newEnemyHP) / parseFloat( newEnemyHP.slice(newEnemyHP.indexOf("/") + 1)) * 100);
+
+    $hpObj.children().first().width( newPlayerHPBarWidth + "px" );
+    $hpObj.children().last().prev().width( newEnemyHPBarWidth + "px" );
 
     playerHP.text( newPlayerHP );
     enemyHP.text( newEnemyHP );
-    $( '.main-page' ).last().append( '<div class="combat-text"> </div>' );
     $( '.combat-text' ).html( combatHTML );
 }
