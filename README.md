@@ -1,4 +1,6 @@
 # Initium Grease
+
+[![Join the chat at https://gitter.im/EFox2413/initiumGrease](https://badges.gitter.im/EFox2413/initiumGrease.svg)](https://gitter.im/EFox2413/initiumGrease?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)/[Tampermonkey](http://tampermonkey.net/) scripts for the html-based game [Initium](https://www.playinitium.com)
 
 Status: 
