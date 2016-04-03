@@ -172,8 +172,8 @@ function showTracker() {
  - Press | to show the stats saved for this character in a popup.
 
  */
-window.onkeypress = function( event ) {
-    if (event.keyCode == 124) {
+$(document).on("keydown", function(event) {
+    if (event.which == 220) {
         if ($(':focus').length > 0) {
             if (!($(':focus')[0].localName == "input")) {
                 showTracker();
@@ -182,7 +182,7 @@ window.onkeypress = function( event ) {
             showTracker();
         }
     }
-}
+});
 
 //Prints saved stats from database to console
 function printStats(){
