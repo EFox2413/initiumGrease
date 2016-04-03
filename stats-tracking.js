@@ -192,12 +192,31 @@ function gm_store(dataname, charname, data) {
 
 function statTrackPopup(content)
 {
+    //Close other page-popups(including other stat-counter popups)
+    closePagePopup();
+
     exitFullscreenChat();
 
     currentPopupStackIndex++;
     var pagePopupId = "page-popup"+currentPopupStackIndex;
 
-    $("#page-popup-root").append("<div id='"+pagePopupId+"'><div id='"+pagePopupId+"-content' class='page-popup'><img id='banner-loading-icon' src='javascript/images/wait.gif' border=0/></div><div class='page-popup-glass'></div><a class='page-popup-X' onclick='closePagePopup()'>X</a></div>");
+    //No elements have z-index on the combat screen, so we cant have page-popup-glass there because it relies on z-index to not cover everything
+    var structure = "<div id='"+pagePopupId+"'><div id='"+pagePopupId+"-content' style='min-height:150px;' class='page-popup'><img id='banner-loading-icon' src='javascript/images/wait.gif' border=0/></div><div class='page-popup-glass'></div><a class='page-popup-X' onclick='closePagePopup()'>X</a></div>"
+
+    //Page popup root doesn't exist on the combat screen.
+    if ($("#page-popup-root").length == 0) {
+        $('<div id="page-popup-root"></div>').insertAfter(".chat_box");
+    }
+
+    //Create popup
+    $("#page-popup-root").append(structure);
+
+    //If chat box doesnt have z index, remove glass box
+    if( $(".chat_box").css('z-index') != '1000100') {
+        $(".page-popup-glass").remove();
+    }
+
+    //Fill popup with content
     $("#"+pagePopupId+"-content").html(content);
 
 
