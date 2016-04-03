@@ -1,7 +1,6 @@
 # Initium Grease
 [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)/[Tampermonkey](http://tampermonkey.net/) scripts for the html-based game [Initium](https://www.playinitium.com)
 
-## Last Edited 3/30/16
 Status: 
 -  :white_check_mark: [weather-script](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js)
 -  :white_check_mark: [display-stats](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/display-stats.js)
@@ -30,7 +29,10 @@ Mutes specificed playrs in the chatbox via command /mute <playername>
 
 ## stats-tracking
 Tracks your stats for each attack performed
-### Documentation
+
+
+ Documentation:
+ 
   On attack button click, the script will record your previous stats and previous attack number in a database.
   
   To see all of the attacks and stats recorded you can press the (~) key and they will print to the console.
