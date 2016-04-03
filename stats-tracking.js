@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            stats-tracking
 // @namespace       https://github.com/EFox2413/initiumGrease
-// @version         0.2.0.0
+// @version         0.3.0.0
 // @updateURL       https://raw.githubusercontent.com/EFox2413/initiumGrease/master/stats-tracking.js
 // @downloadURL     https://raw.githubusercontent.com/EFox2413/initiumGrease/master/stats-tracking.js
 // @supportURL      https://github.com/EFox2413/initiumGrease/issues
@@ -23,21 +23,15 @@ var characterName = $( '.character-display-box' ).children( 'div' ).children('a'
 var enabled = false;
 var saved = false;
 var prevStats = JSON.parse( GM_getValue(characterName, "[]") );
-var dbLength = prevStats.length+1;
+var dbLength = prevStats.length;
 
 var href = $( '.character-display-box').children().first().attr( "rel" );
-var atkButtons =  $( '.main-buttonbox' ).children( 'a' ).slice(0,2);
 var clickOnceOnly = 0;
-
-var currentStats = getStats();
-
-jQuery.fn.reverse = [].reverse;
 
 //Check if character is enabled for tracking.
 var settings = JSON.parse( GM_getValue("initium_counter_settings", "[]") );
 
 settings.forEach(function(char) {
-    console.log(char);
     if(char.name == characterName) {
         saved = true;
         enabled = char.enabled;
@@ -50,22 +44,22 @@ if (!saved) {
         "name":characterName,
         "enabled":false
     }
-    settings.push(newSetting)
-    GM_setValue("initium_counter_settings", JSON.stringify(settings))
+    settings.push(newSetting);
+    GM_setValue("initium_counter_settings", JSON.stringify(settings));
     saved = true;
 }
 
 //Add icon to icon bar and bind to toggle function
 if (enabled) {
-    addTracking()
     //Can add <div class="header-stats-caption">Counter</div> inside a tag underneath for caption.
-    var htmlString = '<div style="display:inline-block; cursor: pointer;" id="statCounter"><img style="padding: 0 0 3px;" src="https://s3.amazonaws.com/imappy/3d_bar_chart.png" border="0/"></div>'
+    var htmlString = '<div style="display:inline-block; cursor: pointer;" id="statCounter"><img style="padding: 0 0 3px;" src="https://s3.amazonaws.com/imappy/3d_bar_chart.png" border="0/"></div>';
 } else {
-    var htmlString = '<div style="display:inline-block; cursor: pointer;" id="statCounter"><img style="padding: 0 0 3px;" src="https://s3.amazonaws.com/imappy/3d_bar_chart_off.png" border="0/"></div>'
+    var htmlString = '<div style="display:inline-block; cursor: pointer;" id="statCounter"><img style="padding: 0 0 3px;" src="https://s3.amazonaws.com/imappy/3d_bar_chart_off.png" border="0/"></div>';
 }
+$(".header-stats").prepend(htmlString);
+$("#statCounter").click(showTracker);
 
-$(".header-stats").prepend(htmlString)
-$("#statCounter").click(showTracker)
+addTracking();
 
 //Function to toggle enabled/disabled for current character
 function toggleCounter() {
@@ -73,62 +67,83 @@ function toggleCounter() {
     var settings = JSON.parse( GM_getValue("initium_counter_settings", "[]") );
     settings.forEach(function(char) {
         if(char.name == characterName) {
-            console.log("StatTracking for "+characterName+" is now "+enabled)
+            console.log("StatTracking for "+characterName+" is now "+enabled);
             char.enabled = enabled;
         }
     });
 
     //Switch out picture
     if(enabled) {
-        addTracking()
-        $("#statCounter")[0].children[0].src = "https://s3.amazonaws.com/imappy/3d_bar_chart.png"
+        $("#statCounter")[0].children[0].src = "https://s3.amazonaws.com/imappy/3d_bar_chart.png";
         $("#statEnabler").text("Disable")
     } else {
-        $("#statCounter")[0].children[0].src = "https://s3.amazonaws.com/imappy/3d_bar_chart_off.png"
+        $("#statCounter")[0].children[0].src = "https://s3.amazonaws.com/imappy/3d_bar_chart_off.png";
         $("#statEnabler").text("Enable")
-        atkButtons.unbind("click",tracking);
     }
 
-    GM_setValue("initium_counter_settings", JSON.stringify(settings))
+    GM_setValue("initium_counter_settings", JSON.stringify(settings));
 }
 
 //Add Stat Tracking logic
 function addTracking() {
-    // Determine if Attack button was pressed
-    if ( clickOnceOnly === 0 ) {
-        if ( atkButtons.attr( 'href' ).includes( 'attack' ) ) {
-            atkButtons.bind("click",tracking);
-        }
-    }
-}
+    //Get attack buttons
+    var attackButtons = $('.main-buttonbox a[href*="ServletCharacterControl?type=attack"]');
 
-//Gets the stats via ajax on pageload
-function getStats() {
-    $.ajax({
-        url: href,
-        type: "GET",
-        success: function(charPage) {
-            var statsDiv = $(charPage).find('.main-item-subnote');
-            var stats = dbLength+" ";
+    //Iterate through attack buttons
+    $.each(attackButtons, function(index,item) {
 
-            statsDiv.each(function( index ) {
-                if ( index > 0  && index < 4) {
-                    stats += $( this ).text().split(" ")[0] + "  ";
-                }
-            });
-            return stats;
-        }
-    })
-    .fail(function() {
-        alert("stats retrieval failed; abort script");
+        //Save current buttons action link(right hand attack or left hand attack)
+        var attackURL = item.href;
+
+        //Remove current link
+        item.href = "#";
+
+        //Bind click to tracking with previous attack link as argument
+        $(item).on("click",{ atkurl : attackURL },tracking);
     });
 }
 
-function tracking() {
-    // increment clickOnce counter
+function tracking(event) {
+    //Increment clickOnce counter
     clickOnceOnly++;
-    gm_store("stats", characterName, currentStats);
-};
+
+    if ( clickOnceOnly == 1 ) {
+        if (enabled) {
+            //Add stat counter status
+            $(".main-buttonbox").append('<div style="text-align: center;" id="stat-counter-status">Status: Fetching stats..</div>');
+
+            $.ajax({
+                url: href,
+                type: "GET",
+                timeout: 2000,
+                //If successful, get stats and redirect
+                success: function(charPage) {
+                    var statsDiv = $(charPage).find('.main-item-subnote');
+                    var stats = dbLength+" ";
+
+                    statsDiv.each(function( index ) {
+                        if ( index > 0  && index < 4) {
+                            stats += $( this ).text().split(" ")[0] + "  ";
+                        }
+                    });
+
+                    gm_store("stats", characterName, stats);
+
+                    $(".main-buttonbox #stat-counter-status").text("Status: Success. Redirecting..");
+
+                    window.location.href = event.data.atkurl;
+                },
+                //If not successful or 2s passed(assume disconnect), update status and stop
+                error: function(xhr, textStatus, errorThrown){
+                    clickOnceOnly = 0;
+                    $(".main-buttonbox #stat-counter-status").text("Status: Failed fetching stats. Aborting attack. Try again.");
+                }
+            });
+        } else {
+            window.location.href = event.data.atkurl;
+        }
+    }
+}
 
 function showTracker() {
     var popTitle = "<center><h3>Stat Tracker for "+characterName+"</h3></center>";
@@ -158,8 +173,8 @@ function showTracker() {
  Some shortcuts.
  - Press | to show the stats saved for this character in a popup.
  */
-window.onkeypress = function( event ) {
-    if (event.keyCode == 124) {
+$(document).on("keydown", function(event) {
+    if (event.which == 220) {
         if ($(':focus').length > 0) {
             if (!($(':focus')[0].localName == "input")) {
                 showTracker();
@@ -168,7 +183,7 @@ window.onkeypress = function( event ) {
             showTracker();
         }
     }
-}
+});
 
 //Prints saved stats from database to console
 function printStats(){
@@ -199,13 +214,33 @@ function gm_store(dataname, charname, data) {
     }
 }
 
-function statTrackPopup(content) {
+function statTrackPopup(content)
+{
+    //Close other page-popups(including other stat-counter popups)
+    closePagePopup();
+
     exitFullscreenChat();
 
     currentPopupStackIndex++;
     var pagePopupId = "page-popup"+currentPopupStackIndex;
 
-    $("#page-popup-root").append("<div id='"+pagePopupId+"'><div id='"+pagePopupId+"-content' class='page-popup'><img id='banner-loading-icon' src='javascript/images/wait.gif' border=0/></div><div class='page-popup-glass'></div><a class='page-popup-X' onclick='closePagePopup()'>X</a></div>");
+    //No elements have z-index on the combat screen, so we cant have page-popup-glass there because it relies on z-index to not cover everything
+    var structure = "<div id='"+pagePopupId+"'><div id='"+pagePopupId+"-content' style='min-height:150px;' class='page-popup'><img id='banner-loading-icon' src='javascript/images/wait.gif' border=0/></div><div class='page-popup-glass'></div><a class='page-popup-X' onclick='closePagePopup()'>X</a></div>"
+
+    //Page popup root doesn't exist on the combat screen.
+    if ($("#page-popup-root").length == 0) {
+        $('<div id="page-popup-root"></div>').insertAfter(".chat_box");
+    }
+
+    //Create popup
+    $("#page-popup-root").append(structure);
+
+    //If chat box doesnt have z index, remove glass box
+    if( $(".chat_box").css('z-index') != '1000100') {
+        $(".page-popup-glass").remove();
+    }
+
+    //Fill popup with content
     $("#"+pagePopupId+"-content").html(content);
 
     if (currentPopupStackIndex === 1)
