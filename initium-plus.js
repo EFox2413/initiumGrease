@@ -566,7 +566,7 @@ if (!saved) {
     var newSetting = {
         "name":characterName,
         "enabled":false
-    }
+    };
     settings.push(newSetting);
     GM_setValue("initium_counter_settings", JSON.stringify(settings));
     saved = true;
@@ -586,8 +586,8 @@ addTracking();
 
 //Function to toggle enabled/disabled for current character
 function toggleCounter() {
-    enabled = !enabled
-        var settings = JSON.parse( GM_getValue("initium_counter_settings", "[]") );
+    enabled = !enabled;
+    var settings = JSON.parse( GM_getValue("initium_counter_settings", "[]") );
     settings.forEach(function(char) {
         if(char.name == characterName) {
             console.log("StatTracking for "+characterName+" is now "+enabled);
@@ -598,10 +598,10 @@ function toggleCounter() {
     //Switch out picture
     if(enabled) {
         $("#statCounter")[0].children[0].src = "https://s3.amazonaws.com/imappy/3d_bar_chart.png";
-        $("#statEnabler").text("Disable")
+        $("#statEnabler").text("Disable");
     } else {
         $("#statCounter")[0].children[0].src = "https://s3.amazonaws.com/imappy/3d_bar_chart_off.png";
-        $("#statEnabler").text("Enable")
+        $("#statEnabler").text("Enable");
     }
 
     GM_setValue("initium_counter_settings", JSON.stringify(settings));
@@ -671,24 +671,25 @@ function tracking(event) {
 function showTracker() {
     var popTitle = "<center><h3>Stat Tracker for "+characterName+"</h3></center>";
     var popContent = "";
+    var nextState = "";
     if(enabled) {
-        var nextState = "Disable";
+        nextState = "Disable";
     } else {
-        var nextState = "Enable";
+        nextState = "Enable";
     }
-    popContent += '<div class="main-button-half" id="statEnabler" style="margin: 0 5% 0 5%; width: 40%; display: inline-block; line-height: 24px" shortcut="86">'+nextState+'</div>'
-        popContent += '<div class="main-button-half" id="statCleaner" style="margin: 0 5% 0 5%; width: 40%; display: inline-block; line-height: 24px" shortcut="86">Clear</div>'
-        popContent += '\n\n<center><h3>Saved stats:</h3></center>'
+    popContent += '<div class="main-button-half" id="statEnabler" style="margin: 0 5% 0 5%; width: 40%; display: inline-block; line-height: 24px" shortcut="86">'+nextState+'</div>';
+        popContent += '<div class="main-button-half" id="statCleaner" style="margin: 0 5% 0 5%; width: 40%; display: inline-block; line-height: 24px" shortcut="86">Clear</div>';
+        popContent += '\n\n<center><h3>Saved stats:</h3></center>';
 
         var savedStats = JSON.parse( GM_getValue(characterName, "[]") );
     $.each(savedStats.reverse(), function(index,stat) {
         popContent += "<center>"+stat+"</center>";
     });
 
-    statTrackPopup(popTitle+popContent)
+    statTrackPopup(popTitle+popContent);
 
-        $("#statCleaner").click(clearStats)
-        $("#statEnabler").click(toggleCounter)
+        $("#statCleaner").click(clearStats);
+        $("#statEnabler").click(toggleCounter);
 }
 
 
@@ -710,7 +711,7 @@ $(document).on("keydown", function(event) {
 
 //Prints saved stats from database to console
 function printStats(){
-    console.log("Stats for " + characterName + ":")
+    console.log("Stats for " + characterName + ":");
         var savedStats = JSON.parse(GM_getValue(characterName, "[]"));
     savedStats.forEach(function(stat) {
         console.log(stat);
@@ -720,9 +721,9 @@ function printStats(){
 //Clears stats in database for current character
 function clearStats(){
     if (confirm('You sure you want to delete the stats saved for '+characterName+'?')) {
-        GM_setValue(characterName, "[]")
-            closePagePopup()
-            showTracker()
+        GM_setValue(characterName, "[]");
+            closePagePopup();
+            showTracker();
     }
 }
 
@@ -730,10 +731,10 @@ function clearStats(){
 function gm_store(dataname, charname, data) {
     if (dataname == "stats") {
         var stats = JSON.parse( GM_getValue(charname, "[]") );
-        stats.push(data)
-            GM_setValue(charname, JSON.stringify(stats))
+        stats.push(data);
+            GM_setValue(charname, JSON.stringify(stats));
 
-            console.log("Added "+data+" to "+charname)
+            console.log("Added "+data+" to "+charname);
     }
 }
 
@@ -747,7 +748,7 @@ function statTrackPopup(content) {
     var pagePopupId = "page-popup"+currentPopupStackIndex;
 
     //No elements have z-index on the combat screen, so we cant have page-popup-glass there because it relies on z-index to not cover everything
-    var structure = "<div id='"+pagePopupId+"'><div id='"+pagePopupId+"-content' style='min-height:150px;' class='page-popup'><img id='banner-loading-icon' src='javascript/images/wait.gif' border=0/></div><div class='page-popup-glass'></div><a class='page-popup-X' onclick='closePagePopup()'>X</a></div>"
+    var structure = "<div id='"+pagePopupId+"'><div id='"+pagePopupId+"-content' style='min-height:150px;' class='page-popup'><img id='banner-loading-icon' src='javascript/images/wait.gif' border=0/></div><div class='page-popup-glass'></div><a class='page-popup-X' onclick='closePagePopup()'>X</a></div>";
 
         //Page popup root doesn't exist on the combat screen.
         if ($("#page-popup-root").length == 0) {
