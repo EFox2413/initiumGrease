@@ -79,6 +79,7 @@ var Util = function() {
 
 // CONFIG
 var Config = function() {
+    var popTitle = "<center><h3>Initium+ Configuration</h3></center>";
 
     var init = function() {
     }
@@ -789,16 +790,23 @@ var StatsTracking = function() {
         var popTitle = "<center><h3>Stat Tracker for "+characterName+"</h3></center>";
         var popContent = "";
         var nextState = "";
+
         if(enabled) {
             nextState = "Disable";
         } else {
             nextState = "Enable";
         }
-        popContent += '<div class="main-button-half" id="statEnabler" style="margin: 0 5% 0 5%; width: 40%; display: inline-block; line-height: 24px" shortcut="86">'+nextState+'</div>';
-            popContent += '<div class="main-button-half" id="statCleaner" style="margin: 0 5% 0 5%; width: 40%; display: inline-block; line-height: 24px" shortcut="86">Clear</div>';
-            popContent += '\n\n<center><h3>Saved stats:</h3></center>';
 
-            var savedStats = JSON.parse( GM_getValue(characterName, "[]") );
+        popContent += '<div class="main-button-half" id="statEnabler" ' +
+            'style="margin: 0 5% 0 5%; width: 40%; display: inline-block; ' +
+            'line-height: 24px" shortcut="86">'+nextState+'</div>' +
+            '<div class="main-button-half" id="statCleaner" ' +
+            'style="margin: 0 5% 0 5%; width: 40%; display: inline-block; ' +
+            'line-height: 24px" shortcut="86">Clear</div>' +
+            '\n\n<center><h3>Saved stats:</h3></center>';
+
+        var savedStats = JSON.parse( GM_getValue(characterName, "[]") );
+
         $.each(savedStats.reverse(), function(index,stat) {
             popContent += "<center>"+stat+"</center>";
         });
