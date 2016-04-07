@@ -68,11 +68,26 @@ var Util = function() {
         if (currentPopupStackIndex > 1) {
             $("#page-popup" + (currentPopupStackIndex-1)).hide();
         }
-    }
+    };
 
     var oPublic = {
         mkPopup: mkPopup,
     };
+
+    return oPublic;
+}();
+
+// CONFIG
+var Config = function() {
+
+    var init = function() {
+    }
+
+    var oPublic = {
+        init: init,
+    };
+
+    return oPublic;
 }();
 
 //-------------------------FEATURES-------------------------\\
