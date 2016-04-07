@@ -18,7 +18,64 @@
 
 var $ = window.jQuery;
 
-//-------------------------SCRIPT MODULES-------------------------\\
+//-------------------------UTILITIES-----------------------\\
+
+// UTIL
+var Util = function() {
+    var mkPopup = function(content) {
+        // close all other popups
+        closePagePopup();
+        exitFullscreenChat();
+        currentPopupStackIndex++;
+
+        var pagePopupId = "page-popup"+currentPopupStackIndex;
+
+        //No elements have z-index on the combat screen, so we
+        //cant have page-popup-glass there because it relies on
+        //z-index to not cover everything
+        var structure = "<div id='"+pagePopupId+"'><div id='" +
+            pagePopupId+"-content' style='min-height:150px;' " +
+            "class='page-popup'><img id='banner-loading-icon' " +
+            "src='javascript/images/wait.gif' border=0/></div>" +
+            "<div class='page-popup-glass'></div><a class='page-popup-X' " +
+            "onclick='closePagePopup()'>X</a></div>";
+
+        // checks if current page is /combat.jsp
+        //  and adds a div if it is
+        if ($("#page-popup-root").length == 0) {
+            $('<div id="page-popup-root"></div>').insertAfter(".chat_box");
+        }
+
+        //Create popup
+        $("#page-popup-root").append(structure);
+
+        //If chat box doesnt have z index, remove glass box
+        if( $(".chat_box").css('z-index') != '1000100') {
+            $(".page-popup-glass").remove();
+        }
+
+        //Fill popup with content
+        $("#"+pagePopupId+"-content").html(content);
+
+        if (currentPopupStackIndex === 1) {
+            $(document).bind("keydown",function(e) {
+                if ((e.keyCode == 27)) {
+                    closePagePopup();
+                }
+            });
+        }
+
+        if (currentPopupStackIndex > 1) {
+            $("#page-popup" + (currentPopupStackIndex-1)).hide();
+        }
+    }
+
+    var oPublic = {
+        mkPopup: mkPopup,
+    };
+}();
+
+//-------------------------FEATURES-------------------------\\
 
 // DEBUFF
 var Debuff = function() {
@@ -340,7 +397,7 @@ var MuteList = function() {
     return oPublic;
 }();
 
-// NEARBY ITEMS 
+// NEARBY ITEMS
 var NearbyItems = function() {
     var itemButton = $( '#main-itemlist' ).children();
 
@@ -485,7 +542,7 @@ var NearbyItems = function() {
     return oPublic;
 }();
 
-// NO REFRESH 
+// NO REFRESH
 var NoRefresh = function() {
     var init = function() {
         $( '.main-page' ).last().append( '<div class="combat-text"> </div>' );
@@ -570,7 +627,7 @@ var NoRefresh = function() {
     return oPublic;
 }();
 
-// STATS TRACKING 
+// STATS TRACKING
 var StatsTracking = function() {
     var characterName = $( '.character-display-box' ).children( 'div' ).children('a').first().text();
 
@@ -660,7 +717,6 @@ var StatsTracking = function() {
 
         //Iterate through attack buttons
         $.each(attackButtons, function(index,item) {
-
             //Save current buttons action link(right hand attack or left hand attack)
             var attackURL = item.href;
 
@@ -732,10 +788,10 @@ var StatsTracking = function() {
             popContent += "<center>"+stat+"</center>";
         });
 
-        statTrackPopup(popTitle+popContent);
+        Util.mkPopup(popTitle + popContent);
 
-            $("#statCleaner").click(clearStats);
-            $("#statEnabler").click(toggleCounter);
+        $("#statCleaner").click(clearStats);
+        $("#statEnabler").click(toggleCounter);
     }
 
     //Prints saved stats from database to console
@@ -767,49 +823,6 @@ var StatsTracking = function() {
         }
     }
 
-    function statTrackPopup(content) {
-        //Close other page-popups(including other stat-counter popups)
-        closePagePopup();
-
-        exitFullscreenChat();
-
-        currentPopupStackIndex++;
-        var pagePopupId = "page-popup"+currentPopupStackIndex;
-
-        //No elements have z-index on the combat screen, so we cant have page-popup-glass there because it relies on z-index to not cover everything
-        var structure = "<div id='"+pagePopupId+"'><div id='"+pagePopupId+"-content' style='min-height:150px;' class='page-popup'><img id='banner-loading-icon' src='javascript/images/wait.gif' border=0/></div><div class='page-popup-glass'></div><a class='page-popup-X' onclick='closePagePopup()'>X</a></div>";
-
-            //Page popup root doesn't exist on the combat screen.
-            if ($("#page-popup-root").length == 0) {
-                $('<div id="page-popup-root"></div>').insertAfter(".chat_box");
-            }
-
-        //Create popup
-        $("#page-popup-root").append(structure);
-
-        //If chat box doesnt have z index, remove glass box
-        if( $(".chat_box").css('z-index') != '1000100') {
-            $(".page-popup-glass").remove();
-        }
-
-        //Fill popup with content
-        $("#"+pagePopupId+"-content").html(content);
-
-        if (currentPopupStackIndex === 1)
-        {
-            $(document).bind("keydown",function(e)
-                    {
-                        if ((e.keyCode == 27))
-            {
-                closePagePopup();
-            }
-                    });
-        }
-
-        if (currentPopupStackIndex>1)
-            $("#page-popup"+(currentPopupStackIndex-1)).hide();
-    }
-
     var oPublic = {
         init: init,
     };
@@ -817,7 +830,7 @@ var StatsTracking = function() {
     return oPublic;
 }();
 
-// WEATHER FORECAST 
+// WEATHER FORECAST
 var WeatherForecast = function() {
     // Weather ratio from getWeather function in server js file...
     var weatherInt = getWeather();
