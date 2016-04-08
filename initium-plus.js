@@ -77,20 +77,6 @@ var Util = function() {
     return oPublic;
 }();
 
-// CONFIG
-var Config = function() {
-    var popTitle = "<center><h3>Initium+ Configuration</h3></center>";
-
-    var init = function() {
-    }
-
-    var oPublic = {
-        init: init,
-    };
-
-    return oPublic;
-}();
-
 //-------------------------FEATURES-------------------------\\
 
 // DEBUFF
@@ -191,7 +177,7 @@ var Debuff = function() {
 // DISPLAY STATS
 // TODO since this uses the same ajax call as in
 //      stats tracking, might as well call the same fn
-var DisplayStats = function() {
+var StatDisplay = function() {
     var charDiv = $('.character-display-box').children(" div:nth-child(3)").children( 'a' );
     var statsItems;
     var statsID = ["S", "D", "I", "W"];
@@ -222,7 +208,7 @@ var DisplayStats = function() {
 }();
 
 // ICONS
-var Icons = function() {
+var ExtraIcons = function() {
     // links to resources
     var mapLink = "https://imgur.com/ZuUibeV";
     var changelogLink = "viewChangelog()";
@@ -255,13 +241,12 @@ var Icons = function() {
 }();
 
 // MUTE LIST
-var MuteList = function() {
+var MuteChat = function() {
     var banList = [];
 
     // add a ban
     function addBan( name ) {
         if (checkNameOnBanList( name )) {
-            console.log( name + " is on ban list already.");
             return;
         }
         banList.push(name);
@@ -278,14 +263,12 @@ var MuteList = function() {
         });
 
         if (removed === false) {
-            console.log(name + " is not muted.");
         }
     }
 
     // mainly for debug, prints every item on banList
     function getBanList() {
         banList.forEach( function( each ) {
-            console.log(each + ";");
         });
     }
 
@@ -414,7 +397,7 @@ var MuteList = function() {
 }();
 
 // NEARBY ITEMS
-var NearbyItems = function() {
+var ItemList = function() {
     var itemButton = $( '#main-itemlist' ).children();
 
     var init = function() {
@@ -644,7 +627,7 @@ var NoRefresh = function() {
 }();
 
 // STATS TRACKING
-var StatsTracking = function() {
+var TrackStats = function() {
     var characterName = $( '.character-display-box' ).children( 'div' ).children('a').first().text();
 
     var enabled = false;
@@ -709,7 +692,6 @@ var StatsTracking = function() {
         var settings = JSON.parse( GM_getValue("initium_counter_settings", "[]") );
         settings.forEach(function(char) {
             if(char.name == characterName) {
-                console.log("StatTracking for "+characterName+" is now "+enabled);
                 char.enabled = enabled;
             }
         });
@@ -799,7 +781,7 @@ var StatsTracking = function() {
 
         popContent += '<div class="main-button-half" id="statEnabler" ' +
             'style="margin: 0 5% 0 5%; width: 40%; display: inline-block; ' +
-            'line-height: 24px" shortcut="86">'+nextState+'</div>' +
+            'line-height: 24px" shortcut="86">' + nextState + '</div>' +
             '<div class="main-button-half" id="statCleaner" ' +
             'style="margin: 0 5% 0 5%; width: 40%; display: inline-block; ' +
             'line-height: 24px" shortcut="86">Clear</div>' +
@@ -945,14 +927,125 @@ var WeatherForecast = function() {
     return oPublic;
 }();
 
-//-------------------------INITIALIZATION-------------------------\\
+//-----------------------CONFIG-----------------\\
+/*
+   displays checkboxes to enable or disable each script
+   accessed by pressing the letter c, or typing /config in chat
+ */
+var Config = function() {
+    // string for database access
+    var dbConfigString = "configString";
+    var dbConfigStringVal = "";
+    // name of all scripts / features to be enabled
+    var scriptNames = [ "Debuff", "StatDisplay", "ExtraIcons", "MuteChat",
+                        "NoRefresh", "TrackStats", "WeatherForecast",
+                        "ItemList" ];
+    var scriptObjects = [ Debuff, StatDisplay, ExtraIcons, MuteChat,
+                          NoRefresh, TrackStats, WeatherForecast,
+                          ItemList ];
 
-Debuff.init();
-DisplayStats.init();
-Icons.init();
-MuteList.init();
-NoRefresh.init();
-StatsTracking.init();
-WeatherForecast.init();
-// NearbyItems.init();
+    // changes dbConfigStringVal + updates database when there is a change
+    var addChangeListener = function( id ) {
+        // we had to use some clever str concatenation because strings are immutable
+        $( id ).change( function() {
+            var boxId = $( this ).attr( "id" );
+            var index = parseInt(boxId[boxId.length - 1]);
 
+            if ( this.checked ) {
+                dbConfigStringVal = dbConfigStringVal.substr(0, index) + 'y' + dbConfigStringVal.substr(index + 1);
+            } else {
+                dbConfigStringVal = dbConfigStringVal.substr(0, index) + 'n' + dbConfigStringVal.substr(index + 1);
+            }
+            GM_setValue(dbConfigString, dbConfigStringVal);
+        });
+    };
+
+    // adds a checkbox to popContent string which will be used to make menu
+    //  name should begin with capital letter for style purposes
+    var makeCheckboxHTML = function(name, isEnabled) {
+        var HTML = '<div class="setting-entry setting-entry-checkbox">' +
+            '<input type="checkbox" id="checkbox' + name + '" ';
+        if (isEnabled) {
+            HTML += 'checked';
+        }
+        HTML += '>' + 'Enable' + name + '</div>';
+        return HTML;
+    };
+
+    // true if the character at index of configString is a y
+    //  meaning the user enabled that script in config popup
+    var checkEnabled = function(index) {
+        return dbConfigStringVal[index] === 'y';
+    };
+
+    // sets database string to enable the default scripts
+    var setToDefault = function() {
+        dbConfigStringVal = "yynynyyn";
+        GM_setValue(dbConfigString, dbConfigStringVal);
+    };
+
+    // enables scripts based on dbConfigStringVal
+    var enableScripts = function() {
+        scriptObjects.forEach( function( entry, index) {
+            if (checkEnabled(index)) {
+                entry.init();
+            }
+        });
+    };
+
+    // makes the config Popup
+    var showConfigMenu = function() {
+        var popTitle = "<center><h2>Initium+ Configuration</h3></center>";
+        var popSubText = "<center><h5>You will need to refresh the webpage " +
+            "for the changes to take effect.</h5></center>";
+        var popContent = "";
+
+        // add checkboxes for all main features, index keeps track
+        //  of place of scripts in array and in dbConfigStringVal
+        scriptNames.forEach( function(entry, index) {
+            popContent += makeCheckboxHTML(entry + index, checkEnabled(index));
+        });
+
+        // add content to the popup and show it
+        Util.mkPopup( popTitle + popSubText + popContent );
+
+        for (var i = 0; i < scriptNames.length; i++) {
+            addChangeListener( "#checkbox" + scriptNames[i] + i);
+        }
+
+        // reset popContent
+        popContent = "";
+    };
+
+    var init = function() {
+        // get the value of db string, if empty set to default
+        dbConfigStringVal = GM_getValue(dbConfigString);
+
+        if ( !dbConfigStringVal || dbConfigStringVal.length !== 8 ) {
+            setToDefault();
+            showConfigMenu();
+        }
+        enableScripts();
+
+        // Press | to show the stats saved for this character in a popup.
+        $(document).on("keydown", function(event) {
+            if (event.which == 99 || event.which == 67) {
+                if ($(':focus').length > 0) {
+                    if (!($(':focus')[0].localName == "input")) {
+                        showConfigMenu();
+                    }
+                } else {
+                    showConfigMenu();
+                }
+            }
+        });
+    };
+
+    var oPublic = {
+        init: init,
+    };
+
+    return oPublic;
+}();
+
+Config.init();
