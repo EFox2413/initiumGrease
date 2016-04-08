@@ -99,20 +99,13 @@ var Debuff = function() {
     // get the charbox div of the player
     var charBox = $( '.character-display-box' ).first();
 
-    // buff specific variables
-    var buffDetailEffect = "";
-    var buffDetailDescript = "";
-    var buffDetailExpiry = "";
-    var buffImage = "";
-    var buffTitle = "";
-
     var isRaining = getWeather() > 0.5;
     var isNight = Util.checkNight();
 
     var isBuffed = $( '.buff-pane' ).length;
 
     // returns the HTML str specific to the viariables
-    var getHTMLStr = function( effect, descript, expiry, img, title ) {
+    var getBuffIconHTML = function( effect, descript, expiry, img, title ) {
         var htmlStr = "<div class='buff-detail'>" +
             "<img style='-webkit-filter:hue-rotate(250deg)' src='" + img + "' border='0'/>" +
             "<div class='buff-detail-header'>" +
@@ -125,55 +118,88 @@ var Debuff = function() {
         return htmlStr;
     };
 
+    // adds the necessary buff pane and hidden tooltip divs
+    var addBuffDivs = function() {
+        // buff specific div HTML to add
+        var buffPaneHTML = "<div class='buff-pane hint' rel='#buffDetails'>" +
+            "</div>";
+        var buffBoxHTML = "<div class='hiddenTooltip' id='buffDetails'>" +
+            "<h4 style='margin-top:0px;'> Your buffs/debuffs </h4></div>";
+
+        // add the divs to the document
+        charBox.append( buffPaneHTML );
+        charBox.append( buffBoxHTML );
+    };
+
+    // adds the rain buff to the buff pane
+    var addRainBuff = function(buffBox) {
+        // image for the buff, re-uses a normal buff icon
+        var buffImage = "https://www.playinitium.com/images/small/Pixel_Art-" +
+            "Icons-Buffs-S_Buff14.png";
+
+        // Rain specific descriptions for the buff cluetip
+        var buffDetailEffect = "It's harder to find new monsters when it's raining.";
+        var buffDetailDescript = "You are having a bit of a rainy day. " +
+            "This happens when you are outside sometimes. " +
+            "The effect lasts for 30 minutes or more depending on the weather.";
+        var buffDetailExpiry = "Expires in ?? minutes. Maybe, you should " +
+            "watch the weather channel.";
+        var buffTitle = "Rainy";
+
+        // add image to buff pane
+        // TODO: make cross compatible
+        $( '.buff-pane' ).append("<img style='-webkit-filter:hue-rotate(250deg)' src='" +
+            buffImage + "' border='0'>");
+
+        // add hidden cluetip div
+        buffBox.append(getBuffIconHTML(buffDetailEffect, buffDetailDescript,
+            buffDetailExpiry, buffImage, buffTitle));
+    };
+
+    // adds the night buff to the buff pane
+    var addNightBuff = function(buffBox) {
+        // Image for the buff, re-uses a normal buff icon with a filter
+        buffImage = "https://www.playinitium.com/images/small2/Pixel_Art-Armor-Icons-Moon1.png";
+
+        // Night specific descriptions for the buff cluetip
+        buffDetailEffect = "Monsters are able to find you more easily. " +
+            "It's harder to find new paths.";
+        buffDetailDescript = "It's nighttime. This happens when the sun goes down. " +
+            "You feel something watching you. You are having trouble seeing. " +
+            "The effect lasts for 30 minutes or more.";
+        buffDetailExpiry = "Expires in ?? minutes. You should really buy a watch.";
+        buffTitle = "Night";
+
+        // add image to buff pane
+        // TODO: make cross compatible
+        $( '.buff-pane' ).append("<img style='-webkit-filter:hue-rotate(250deg)' src='" +
+            buffImage + "' border='0'>");
+
+        // add hidden cluetip div
+        buffBox.append(getBuffIconHTML(buffDetailEffect, buffDetailDescript,
+            buffDetailExpiry, buffImage, buffTitle));
+    };
+
+    // initialize module
     var init = function() {
         if ( isRaining || isNight ) {
+            // add buff divs if there aren't any
             if ( !isBuffed ) {
-                // buff specific divs to add
-                var buffPaneStr = "<div class='buff-pane hint' rel='#buffDetails'>" +
-                    "</div>";
-                var buffBoxStr = "<div class='hiddenTooltip' id='buffDetails'>" +
-                    "<h4 style='margin-top:0px;'> Your buffs/debuffs </h4></div>";
-
-                // add the buff div
-                charBox.append( buffPaneStr );
-                charBox.append( buffBoxStr );
+                addBuffDivs();
             }
-
+            // gets the player's buffBox and not the enemy's
             var buffBox = $( '#buffDetails' ).first();
 
             if (isRaining) {
-                buffDetailEffect = "It's harder to find new monsters when it's raining.";
-                buffDetailDescript = "You are having a bit of a rainy day. " +
-                    "This happens when you are outside sometimes. " +
-                    "The effect lasts for 30 minutes or more depending on the weather.";
-                buffDetailExpiry = "Expires in ?? minutes. Maybe, you should " +
-                    "watch the weather channel.";
-                buffImage = "https://www.playinitium.com/images/small/Pixel_Art-" +
-                    "Icons-Buffs-S_Buff14.png";
-                buffTitle = "Rainy";
-
-                // add image to buff pane
-                $( '.buff-pane' ).append("<img style='-webkit-filter:hue-rotate(250deg)' src='" +
-                        buffImage + "' border='0'>");
-                // add hidden cluetip div
-                buffBox.append(getHTMLStr(buffDetailEffect, buffDetailDescript, buffDetailExpiry, buffImage, buffTitle));
+                addRainBuff(buffBox);
             }
-
             if (isNight) {
-                buffDetailEffect = "Monsters are able to find you more easily. It's harder to find new paths.";
-                buffDetailDescript = "It's nighttime. This happens when the sun goes down. You feel something watching you. You are having trouble seeing The effect lasts for 30 minutes or more.";
-                buffDetailExpiry = "Expires in ?? minutes. You should really buy a watch.";
-                buffImage = "https://www.playinitium.com/images/small2/Pixel_Art-Armor-Icons-Moon1.png";
-                buffTitle = "Night";
-
-                // add image to buff pane
-                $( '.buff-pane' ).append("<img style='-webkit-filter:hue-rotate(250deg)' src='" + buffImage + "' border='0'>");
-                // add hidden cluetip div
-                buffBox.append(getHTMLStr(buffDetailEffect, buffDetailDescript, buffDetailExpiry, buffImage, buffTitle));
+                addNightBuff(buffBox);
             }
         }
     };
 
+    // public API
     var oPublic = {
         init: init,
     };
