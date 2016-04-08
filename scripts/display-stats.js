@@ -1,17 +1,3 @@
-// ==UserScript==
-// @name         display-stats
-// @namespace    https://github.com/EFox2413/initiumGrease
-// @version      0.1.1
-// @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/display-stats.js
-// @downloadURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/display-stats.js
-// @supportURL      https://github.com/EFox2413/initiumGrease/issues
-// @match        https://www.playinitium.com/*
-// @match        http://www.playinitium.com/*
-// @grant        none
-// ==/UserScript==
-/* jshint -W097 */
-'use strict';
-
 var $ = window.jQuery; 
 
 var charDiv = $('.character-display-box').children(" div:nth-child(3)").children( 'a' );

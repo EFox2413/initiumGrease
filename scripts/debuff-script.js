@@ -1,21 +1,6 @@
-// ==UserScript==
-// @name         debuff-script
-// @namespace    https://github.com/EFox2413/initiumGrease
-// @version      0.1.1.0
-// @updateURL    https://raw.githubusercontent.com/EFox2413/initiumGrease/master/debuff-script.js
-// @downloadURL https://raw.githubusercontent.com/EFox2413/initiumGrease/master/debuff-script.js
-// @supportURL      https://github.com/EFox2413/initiumGrease/issues
-// @match       https://www.playinitium.com/*
-// @match       http://www.playinitium.com/*
-// @grant        none
-// ==/UserScript==
-/* jshint -W097 */
-'use strict';
-
 var $ = window.jQuery;
 
 var charBox = $( '.character-display-box' ).first();
-
 
 // buff specific variables
 var buffDetailEffect = "";
@@ -29,13 +14,11 @@ var isNight = checkNight();
 
 var isBuffed = $( '.buff-pane' ).length;
 
-// the buffpane and div(s) we will add for our debuff
-
-
 if ( isRaining || isNight ) {
     if ( !isBuffed ) {
         // buff specific divs to add
-        var buffPaneStr = "<div class='buff-pane hint' rel='#buffDetails'>" + "</div>";
+        var buffPaneStr = "<div class='buff-pane hint' rel='#buffDetails'>" +
+            "</div>";
         var buffBoxStr = "<div class='hiddenTooltip' id='buffDetails'>" +
             "<h4 style='margin-top:0px;'> Your buffs/debuffs </h4></div>";
 
@@ -49,13 +32,18 @@ if ( isRaining || isNight ) {
 
     if (isRaining) {
         buffDetailEffect = "It's harder to find new monsters when it's raining.";
-        buffDetailDescript = "You are having a bit of a rainy day. This happens when you are outside sometimes. The effect lasts for 30 minutes or more depending on the weather.";
-        buffDetailExpiry = "Expires in ?? minutes. Maybe, you should watch the weather channel.";
-        buffImage = "https://www.playinitium.com/images/small/Pixel_Art-Icons-Buffs-S_Buff14.png";
+        buffDetailDescript = "You are having a bit of a rainy day. " +
+            "This happens when you are outside sometimes. " +
+            "The effect lasts for 30 minutes or more depending on the weather.";
+        buffDetailExpiry = "Expires in ?? minutes. Maybe, you should " +
+            "watch the weather channel.";
+        buffImage = "https://www.playinitium.com/images/small/Pixel_Art-" +
+            "Icons-Buffs-S_Buff14.png";
         buffTitle = "Rainy";
 
         // add image to buff pane
-        $( '.buff-pane' ).append("<img style='-webkit-filter:hue-rotate(250deg)' src='" + buffImage + "' border='0'>");
+        $( '.buff-pane' ).append("<img style='-webkit-filter:hue-rotate(250deg)' src='" +
+            buffImage + "' border='0'>");
         // add hidden cluetip div
         buffBox.append(getHTMLStr(buffDetailEffect, buffDetailDescript, buffDetailExpiry, buffImage, buffTitle));
     }

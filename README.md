@@ -1,51 +1,43 @@
 # Initium Grease
 [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)/[Tampermonkey](http://tampermonkey.net/) scripts for the html-based game [Initium](https://www.playinitium.com)
 
-Status: 
--  :white_check_mark: [weather-script](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/weather-script.js)
--  :white_check_mark: [display-stats](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/display-stats.js)
--  :white_check_mark: [icons-script](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/icons-script.js)
--  :white_check_mark: [debuff-script](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/debuff-script.js)
--  :white_check_mark: [mute-chat](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/mute-chat.js)
--  :white_check_mark: [stats-tracking](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/stats-tracking.js)
--  :heavy_exclamation_mark: [nearby-items](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/nearby-items.js)
--  :heavy_exclamation_mark: [no-refresh](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/no-refresh.js)
+Script:
+- [Initium+](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/initium-plus.js)
 
-## weather-script
+Feature Status:
+-  :white_check_mark: WeatherForecast
+-  :white_check_mark: StatsDisplay
+-  :white_check_mark: ExtraIcons
+-  :white_check_mark: Debuffs
+-  :white_check_mark: MuteChat
+-  :white_check_mark: TrackStats
+-  :heavy_exclamation_mark: ItemList
+-  :warning: NoRefresh
+
+## WeatherForecast
 Script that displays the weather forecast for the current hour and for the next hour.
 
-## display-stats
+## StatsDisplay
 Displays your character's stats at the top of the page next to your name. W is for weight.
 
-## icons-script
+## ExtraIcons
 Displays two additional icons next to the settings one. Green for the community map and blue for the changelog.
 
-## debuff-script
+## Debuffs
 Displays debuff icons for rainy and nighttime conditions because they have a negative impact on some gameplay elements.
 
-## mute-chat
+## MuteChat
 Mutes specificed playrs in the chatbox via command /mute <playername>
 1 hidden easter-egg
 
-## stats-tracking
-Tracks your stats for each attack performed
+## TrackStats
+Tracks your stats for each attack performed. Supports multiple characters.
 
-
- Documentation:
- 
-  On attack button click, the script will record your previous stats and previous attack number in a database.
-  
-  To see all of the attacks and stats recorded you can press the (~) key and they will print to the console.
-  
-  To see the console you need to right click the web page and click on inspect.
-  
-  The script's name should be specific to the character you are using it with
-  
-  e.g. If my name was troll I would name the script troll-stats
-
-## nearby-items
+## ItemList
 Displays the nearby items in a cluetip and stacks items of the same type.
 Currently does not sort by item-type.
 
-## no-refresh
+## NoRefresh
 Stops the page from refreshing everything on the page instead of just refreshing the changed elements.
+
+Currently only supports the combat page.
