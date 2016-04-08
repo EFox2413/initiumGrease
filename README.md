@@ -4,7 +4,7 @@
 Script:
 - [Initium+](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/initium-plus.js)
 
-Feature Status: 
+Feature Status:
 -  :white_check_mark: WeatherForecast
 -  :white_check_mark: StatsDisplay
 -  :white_check_mark: ExtraIcons
