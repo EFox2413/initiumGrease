@@ -11,6 +11,12 @@ Status:
 -  :heavy_exclamation_mark: [nearby-items](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/nearby-items.js)
 -  :heavy_exclamation_mark: [no-refresh](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/no-refresh.js)
 
+# Contribute
+If you are interested in contributing simple take a look at the issues and try your hand at coding it. Submit a pull request when it's completed. If you need guidance or help feel free to talk to me in game (Elys), leave a comment on an issue, or in the [gitter chat](https://gitter.im/EFox2413/initium-d/~chat#)
+
+
+# Documentation
+
 ## weather-script
 Script that displays the weather forecast for the current hour and for the next hour.
 
