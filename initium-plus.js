@@ -159,16 +159,16 @@ var Debuff = function() {
     // adds the night buff to the buff pane
     var addNightBuff = function(buffBox) {
         // Image for the buff, re-uses a normal buff icon with a filter
-        buffImage = "https://www.playinitium.com/images/small2/Pixel_Art-Armor-Icons-Moon1.png";
+        var buffImage = "https://www.playinitium.com/images/small2/Pixel_Art-Armor-Icons-Moon1.png";
 
         // Night specific descriptions for the buff cluetip
-        buffDetailEffect = "Monsters are able to find you more easily. " +
+        var buffDetailEffect = "Monsters are able to find you more easily. " +
             "It's harder to find new paths.";
-        buffDetailDescript = "It's nighttime. This happens when the sun goes down. " +
+        var buffDetailDescript = "It's nighttime. This happens when the sun goes down. " +
             "You feel something watching you. You are having trouble seeing. " +
             "The effect lasts for 30 minutes or more.";
-        buffDetailExpiry = "Expires in ?? minutes. You should really buy a watch.";
-        buffTitle = "Night";
+        var buffDetailExpiry = "Expires in ?? minutes. You should really buy a watch.";
+        var buffTitle = "Night";
 
         // add image to buff pane
         // TODO: make cross compatible
