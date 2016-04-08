@@ -21,14 +21,17 @@ var $ = window.jQuery;
 //-------------------------UTILITIES-----------------------\\
 
 // UTIL
+//   mkPopup(content);
+//   checkNight();
 var Util = function() {
+    // creates a popup with HTML content
     var mkPopup = function(content) {
-        // close all other popups
+        // close all other popups, increment popup counter
         closePagePopup();
-        exitFullscreenChat();
         currentPopupStackIndex++;
+        exitFullscreenChat();
 
-        var pagePopupId = "page-popup"+currentPopupStackIndex;
+        var pagePopupId = "page-popup" + currentPopupStackIndex;
 
         //No elements have z-index on the combat screen, so we
         //cant have page-popup-glass there because it relies on
@@ -40,8 +43,8 @@ var Util = function() {
             "<div class='page-popup-glass'></div><a class='page-popup-X' " +
             "onclick='closePagePopup()'>X</a></div>";
 
-        // checks if current page is /combat.jsp
-        //  and adds a div if it is
+        // checks if current page is doesn't have #page-popup-root
+        //  and adds the needed div if it is
         if ($("#page-popup-root").length == 0) {
             $('<div id="page-popup-root"></div>').insertAfter(".chat_box");
         }
@@ -57,6 +60,7 @@ var Util = function() {
         //Fill popup with content
         $("#"+pagePopupId+"-content").html(content);
 
+        // pressing escape will close the popup
         if (currentPopupStackIndex === 1) {
             $(document).bind("keydown",function(e) {
                 if ((e.keyCode == 27)) {
@@ -65,22 +69,34 @@ var Util = function() {
             });
         }
 
+        // hides previous popup if there was one
         if (currentPopupStackIndex > 1) {
             $("#page-popup" + (currentPopupStackIndex-1)).hide();
         }
     };
 
-    var oPublic = {
-        mkPopup: mkPopup,
+    // checks if current in-game time is night
+    var checkNight = function() {
+        var randConstant = 318.47133757961783439490445859873;
+        var serverTime = getCurrentServerTime() / (randConstant*60*60*1.5);
+        var amount = Math.abs(Math.sin(serverTime)) * 3.0 - 1.56;
+
+        return amount > 1;
     };
 
+    var oPublic = {
+        mkPopup: mkPopup,
+        checkNight: checkNight,
+    };
     return oPublic;
 }();
 
 //-------------------------FEATURES-------------------------\\
 
 // DEBUFF
+//   init();
 var Debuff = function() {
+    // get the charbox div of the player
     var charBox = $( '.character-display-box' ).first();
 
     // buff specific variables
@@ -91,7 +107,7 @@ var Debuff = function() {
     var buffTitle = "";
 
     var isRaining = getWeather() > 0.5;
-    var isNight = checkNight;
+    var isNight = Util.checkNight();
 
     var isBuffed = $( '.buff-pane' ).length;
 
@@ -107,15 +123,6 @@ var Debuff = function() {
             "<div class='buff-detail-expiry'>" + expiry + "</div>" +
             "</div>" + "</div>";
         return htmlStr;
-    };
-
-    // returns true if it is night
-    var checkNight = function() {
-        var randConstant = 318.47133757961783439490445859873;
-        var serverTime = getCurrentServerTime() / (randConstant*60*60*1.5);
-        var amount = Math.abs(Math.sin(serverTime)) * 3.0 - 1.56;
-
-        return amount > 1;
     };
 
     var init = function() {
@@ -166,6 +173,90 @@ var Debuff = function() {
             }
         }
     };
+
+    var oPublic = {
+        init: init,
+    };
+
+    return oPublic;
+}();
+
+// WEATHER FORECAST
+var WeatherForecast = function() {
+    // Weather ratio from getWeather function in server js file...
+    var weatherInt = getWeather();
+    var lightning = processLightning();
+    var nextWeatherInt = getNextWeather();
+    var nextLightning = getNextLightning();
+
+    function translateToString(wRatio, LRatio) {
+        if (wRatio > 0.5) {
+            if ( LRatio > 0) {
+                return "Stormy";
+            } else {
+                return"Rain";
+            }
+        } else if (wRatio <0.5) {
+            // It's not sunny at night...
+            if (Util.checkNight()) return "Clear";
+            return "Sunny";
+        }
+        return "N/A";
+    }
+
+    var init = function() {
+        $( '.header-location' ).append(  '<span ' + getColor() + '> ' +
+            "Now: " +  translateToString(weatherInt, processLightning) + '<//span>' );
+        $( '.header-location' ).append(  '<span ' + getColor() + '> ' +
+            "Next: " +  translateToString(nextWeatherInt, getNextLightning) + '<//span>' );
+    };
+
+    // returns a color for the string based on whether it's night time or day time
+    function getColor() {
+        if (Util.checkNight()) return 'style="color:purple"';
+        return 'style="color:yellow"';
+    }
+
+    // Weather calculator
+    function getNextWeather() {
+        var serverTime = getCurrentServerTime();
+        var date = new Date(serverTime);
+
+        var behindHour = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()+1);
+        var aheadHour = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()+2);
+        var behindMs = behindHour.getTime();
+        var aheadMs = aheadHour.getTime();
+
+        var behindHourWeather = rnd((behindMs/3600000), 0, 1);
+        var aheadHourWeather = rnd((aheadMs/3600000), 0, 1);
+
+        var weatherDifference = aheadHourWeather-behindHourWeather;
+
+        var hourProgression = (serverTime-behindHour)/3600000;
+
+        var interpolationDelta = weatherDifference*hourProgression;
+
+
+        return behindHourWeather+interpolationDelta;
+    }
+
+    function getNextLightning() {
+        var weather = getNextWeather();
+        var serverTime = getCurrentServerTime();
+
+        var lightningOdds = ((0.1+(weather-0.9))/1.5);
+
+        serverTime=Math.round(serverTime/(1000*1));
+
+        var random = rnd(serverTime, 0, 1);
+        if (random<=lightningOdds)
+        {
+            var lightLevel = rnd(getCurrentServerTime(), -1.5, 0.8);
+            if (lightLevel<0) lightLevel = 0;
+            return lightLevel;
+        }
+        return 0;
+    }
 
     var oPublic = {
         init: init,
@@ -826,98 +917,6 @@ var TrackStats = function() {
 
                 console.log("Added "+data+" to "+charname);
         }
-    }
-
-    var oPublic = {
-        init: init,
-    };
-
-    return oPublic;
-}();
-
-// WEATHER FORECAST
-var WeatherForecast = function() {
-    // Weather ratio from getWeather function in server js file...
-    var weatherInt = getWeather();
-    var lightning = processLightning();
-    var nextWeatherInt = getNextWeather();
-    var nextLightning = getNextLightning();
-
-    function translateToString(wRatio, LRatio) {
-        if (wRatio > 0.5) {
-            if ( LRatio > 0) {
-                return "Stormy";
-            } else {
-                return"Rain";
-            }
-        } else if (wRatio <0.5) {
-            // It's not sunny at night...
-            if (checkNight()) return "Clear";
-            return "Sunny";
-        }
-        return "N/A";
-    }
-
-    var init = function() {
-        $( '.header-location' ).append(  '<span ' + getColor() + '> ' +
-            "Now: " +  translateToString(weatherInt, processLightning) + '<//span>' );
-        $( '.header-location' ).append(  '<span ' + getColor() + '> ' +
-            "Next: " +  translateToString(nextWeatherInt, getNextLightning) + '<//span>' );
-    };
-
-    // returns a color for the string based on whether it's night time or day time
-    function getColor() {
-        if (checkNight()) return 'style="color:purple"';
-        return 'style="color:yellow"';
-    }
-
-    // Weather calculator
-    function getNextWeather() {
-        var serverTime = getCurrentServerTime();
-        var date = new Date(serverTime);
-
-        var behindHour = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()+1);
-        var aheadHour = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()+2);
-        var behindMs = behindHour.getTime();
-        var aheadMs = aheadHour.getTime();
-
-        var behindHourWeather = rnd((behindMs/3600000), 0, 1);
-        var aheadHourWeather = rnd((aheadMs/3600000), 0, 1);
-
-        var weatherDifference = aheadHourWeather-behindHourWeather;
-
-        var hourProgression = (serverTime-behindHour)/3600000;
-
-        var interpolationDelta = weatherDifference*hourProgression;
-
-
-        return behindHourWeather+interpolationDelta;
-    }
-
-    function getNextLightning() {
-        var weather = getNextWeather();
-        var serverTime = getCurrentServerTime();
-
-        var lightningOdds = ((0.1+(weather-0.9))/1.5);
-
-        serverTime=Math.round(serverTime/(1000*1));
-
-        var random = rnd(serverTime, 0, 1);
-        if (random<=lightningOdds)
-        {
-            var lightLevel = rnd(getCurrentServerTime(), -1.5, 0.8);
-            if (lightLevel<0) lightLevel = 0;
-            return lightLevel;
-        }
-        return 0;
-    }
-
-    function checkNight() {
-        var randConstant = 318.47133757961783439490445859873;
-        var serverTime = getCurrentServerTime() / (randConstant*60*60*1.5);
-        var amount = Math.abs(Math.sin(serverTime)) * 3.0 - 1.56;
-
-        return amount > 1;
     }
 
     var oPublic = {
