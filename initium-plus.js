@@ -101,7 +101,6 @@ var Debuff = function() {
 
     var isRaining = getWeather() > 0.5;
     var isNight = Util.checkNight();
-
     var isBuffed = $( '.buff-pane' ).length;
 
     // returns the HTML str specific to the viariables
@@ -208,6 +207,7 @@ var Debuff = function() {
 }();
 
 // WEATHER FORECAST
+//   init();
 var WeatherForecast = function() {
     // Weather ratio from getWeather function in server js file...
     var weatherInt = getWeather();
@@ -222,9 +222,11 @@ var WeatherForecast = function() {
             } else {
                 return"Rain";
             }
-        } else if (wRatio <0.5) {
+        } else if (wRatio < 0.5) {
             // It's not sunny at night...
-            if (Util.checkNight()) return "Clear";
+            if (Util.checkNight()) {
+                return "Clear";
+            }
             return "Sunny";
         }
         return "N/A";
@@ -287,7 +289,6 @@ var WeatherForecast = function() {
     var oPublic = {
         init: init,
     };
-
     return oPublic;
 }();
 
@@ -310,7 +311,8 @@ var StatDisplay = function() {
 
                 statsItems.each(function( index ) {
                     if ( index > 0 ) {
-                        charDiv.append( " <span style=\"font-size:small\"> " + statsID[index - 1] + ":" +  $( this ).text().split(" ")[0] + " </span>");
+                        charDiv.append( " <span style=\"font-size:small\"> " +
+                            statsID[index - 1] + ":" +  $( this ).text().split(" ")[0] + " </span>");
                     }
                 });
             }
@@ -856,6 +858,7 @@ var TrackStats = function() {
                     url: href,
                     type: "GET",
                     timeout: 2000,
+
                     //If successful, get stats and redirect
                     success: function(charPage) {
                         var statsDiv = $(charPage).find('.main-item-subnote');
@@ -936,19 +939,19 @@ var TrackStats = function() {
 
     //Inserts into database
     function gm_store(dataname, charname, data) {
-        if (dataname == "stats") {
+        if (dataname === "stats") {
             var stats = JSON.parse( GM_getValue(charname, "[]") );
             stats.push(data);
-                GM_setValue(charname, JSON.stringify(stats));
 
-                console.log("Added "+data+" to "+charname);
+            GM_setValue(charname, JSON.stringify(stats));
+
+            console.log("Added "+data+" to "+charname);
         }
     }
 
     var oPublic = {
         init: init,
     };
-
     return oPublic;
 }();
 
@@ -957,6 +960,9 @@ var TrackStats = function() {
    displays checkboxes to enable or disable each script
    accessed by pressing the letter c, or typing /config in chat
  */
+
+// CONFIG
+//    init();
 var Config = function() {
     // string for database access
     var dbConfigString = "configString";
@@ -988,12 +994,14 @@ var Config = function() {
     // adds a checkbox to popContent string which will be used to make menu
     //  name should begin with capital letter for style purposes
     var makeCheckboxHTML = function(name, isEnabled) {
+        var nameWithoutNumber = name.substring(0, name.length - 1);
         var HTML = '<div class="setting-entry setting-entry-checkbox">' +
             '<input type="checkbox" id="checkbox' + name + '" ';
+
         if (isEnabled) {
             HTML += 'checked';
         }
-        HTML += '>' + 'Enable' + name + '</div>';
+        HTML += '>' + 'Enable' + nameWithoutNumber + '</div>';
         return HTML;
     };
 
@@ -1022,7 +1030,7 @@ var Config = function() {
     var showConfigMenu = function() {
         var popTitle = "<center><h2>Initium+ Configuration</h3></center>";
         var popSubText = "<center><h5>You will need to refresh the webpage " +
-            "for the changes to take effect.</h5></center>";
+            "for the changes to take effect. Press C to bring up this menu. "</h5></center>";
         var popContent = "";
 
         // add checkboxes for all main features, index keeps track
@@ -1069,7 +1077,6 @@ var Config = function() {
     var oPublic = {
         init: init,
     };
-
     return oPublic;
 }();
 
