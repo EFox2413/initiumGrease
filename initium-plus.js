@@ -418,6 +418,7 @@ var MuteChat = function() {
     }
 
     var init = function() {
+        // override the native function
         messager.onChatMessage = function(chatMessage) {
             var nName = getNickName(chatMessage.nickname);
 
@@ -690,12 +691,12 @@ var NoRefresh = function() {
     function getData(actionURL) {
         $.get(actionURL)
          .done(function(data) {
-            processData(data);
+            processCombatData(data);
         });
     }
 
     // Gets the hp values and the battle description from the returned data
-    function processData(data) {
+    function processCombatData(data) {
         var $data = $(data);
         var $mainPageDiv = $data.filter( '.main-page' ).last();
         var $hpObj = $mainPageDiv.find( '.character-display-box' ).children( 'div' ).children( 'div' ).children( 'p' );
@@ -1030,7 +1031,7 @@ var Config = function() {
     var showConfigMenu = function() {
         var popTitle = "<center><h2>Initium+ Configuration</h3></center>";
         var popSubText = "<center><h5>You will need to refresh the webpage " +
-            "for the changes to take effect. Press C to bring up this menu. "</h5></center>";
+            "for the changes to take effect. Press C to bring up this menu.</h5></center>";
         var popContent = "";
 
         // add checkboxes for all main features, index keeps track
@@ -1081,3 +1082,4 @@ var Config = function() {
 }();
 
 Config.init();
+NoRefresh2.init();
