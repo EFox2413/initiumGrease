@@ -490,7 +490,7 @@ var Chat = function() {
     var getUserElement = function(name) {
         var HTML = "";
         // class name can't have spaces in it
-        HTML += '<span class="' + name.replace(/\s+/g, '') +
+        HTML += '<span class="' + name.replace(/[\s+\[\]]/g, '') +
             '">' + name + '   ' + UserList.getTime(name) + '</span>';
 
         return HTML;
@@ -499,8 +499,8 @@ var Chat = function() {
     var updateUserListDiv = function(name) {
         // checks if there is an element inside of user-list
         //  of class name
-        if($('.user-list .' + name.replace(/\s+/g, '') ).length) {
-            $( '.' + name.replace(/\s+/g, '') ).replaceWith(getUserElement(name));
+        if($('.user-list .' + name.replace(/[\s+\[\]]/g, '') ).length) {
+            $( '.' + name.replace(/[\s+\[\]]/g, '') ).replaceWith(getUserElement(name));
         } else {
             $( '.user-list' ).append(getUserElement(name) + '<br>');
         }
