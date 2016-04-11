@@ -360,8 +360,78 @@ var ExtraIcons = function() {
 }();
 
 // MUTE LIST
-var MuteChat = function() {
+var Chat = function() {
     var banList = [];
+
+    // array object of names and timestamps
+    // UserList API:
+    //      addName(name)
+    //      updateTime(name, time)
+    //      getTime(name)
+    //      getNames()
+    //      getTimes()
+    var UserList = function() {
+        var nameList = [];
+        var timeList = [];
+
+        // adds the nickname to the list if it is a new name
+        var addName = function(name) {
+            if( isNewName ) {
+                nameList.push(name);
+            }
+        };
+
+        // updates the timestamp for the name given
+        var updateTime = function(name, time) {
+            nameList.forEach(function(entry, index) {
+                if (entry == name) {
+                    console.log(entry + ", " + time + " updated");
+                    timeList[index] = time;
+                }
+            });
+        };
+
+        // gets the timestamp for the name
+        //  if name is not on the list return "N/A"
+        var getTime = function(name) {
+            var returnTime = "N/A";
+            nameList.forEach(function(entry, index) {
+                if (entry == name) {
+                    console.log(entry + ", " + timeList[index] + " retrieved");
+                    returnTime = timeList[index];
+                }
+            });
+            return returnTime;
+        };
+
+        // checks if the name is on the nameList already
+        var isNewName = function(name) {
+            nameList.forEach(function(entry) {
+                if (entry === name) {
+                    return false;
+                }
+            });
+            return true;
+        };
+
+        var getNames = function() {
+            return nameList;
+        };
+
+        var getTimes = function() {
+            return timeList;
+        };
+
+        // public functions
+        var oPublic = {
+            addName: addName,
+            updateTime:updateTime,
+            getTime: getTime,
+            getNames: getNames,
+            getTimes: getTimes,
+        };
+        return oPublic;
+    }();
 
     // add a ban
     function addBan( name ) {
@@ -417,10 +487,35 @@ var MuteChat = function() {
         return name;
     }
 
+    var getUserElement = function(name) {
+        var HTML = "";
+        // class name can't have spaces in it
+        HTML += '<span class="' + name.replace(/\s+/g, '') +
+            '">' + name + '   ' + UserList.getTime(name) + '</span>';
+
+        return HTML;
+    };
+
+    var updateUserListDiv = function(name) {
+        // checks if there is an element inside of user-list
+        //  of class name
+        if($('.user-list .' + name.replace(/\s+/g, '') ).length) {
+            $( '.' + name.replace(/\s+/g, '') ).replaceWith(getUserElement(name));
+        } else {
+            $( '.user-list' ).append(getUserElement(name) + '<br>');
+        }
+    };
+
     var init = function() {
-        // override the native function
+        // adds UserList div to the DOM
+        $( '.mobile-spacer' ).append( '<div class="user-list" ' +
+            'style="position:absolute; ' +
+            'top:27px; z-index:1111111;"></div>' );
+
+        // overrides the default onChatMessage function
         messager.onChatMessage = function(chatMessage) {
             var nName = getNickName(chatMessage.nickname);
+            UserList.addName(nName);
 
             if (checkNameOnBanList(nName) == true) {
                 return;
@@ -446,8 +541,7 @@ var MuteChat = function() {
             }
 
             var html = "<div class='chatMessage-main'>";
-            if (chatMessage.createdDate!=null)
-            {
+            if (chatMessage.createdDate !== null) {
                 var date = new Date(chatMessage.createdDate);
                 var shortTime = date.toLocaleTimeString();
                 var cutoff = shortTime.length;
@@ -459,12 +553,19 @@ var MuteChat = function() {
                 shortTime = shortTime.substring(0, cutoff);
                 var longDate = date.toLocaleDateString();
 
+                // updates the timestamp in our userlist
+                console.log("ShortTime: " + shortTime);
+                UserList.updateTime(nName, shortTime);
+
                 html+="<span class='chatMessage-time' title='"+longDate+"'>";
                 html+="["+shortTime+"] ";
                 html+="</span>";
             }
-            if (chatMessage.code=="PrivateChat")
-            {
+
+            // updates the UserList div
+            updateUserListDiv(nName);
+
+            if (chatMessage.code=="PrivateChat") {
                 html+="<a class='chatMessage-private-nickname' onclick='setPrivateChatTo(\""+chatMessage.nickname+"\", "+chatMessage.characterId+")'>"+chatMessage.nickname+"</a>";
                 html+="<span class='chatMessage-text'>";
                 html+=" ";
@@ -512,7 +613,6 @@ var MuteChat = function() {
     var oPublic = {
         init: init,
     };
-
     return oPublic;
 }();
 
@@ -691,12 +791,12 @@ var NoRefresh = function() {
     function getData(actionURL) {
         $.get(actionURL)
          .done(function(data) {
-            processCombatData(data);
+            processData(data);
         });
     }
 
     // Gets the hp values and the battle description from the returned data
-    function processCombatData(data) {
+    function processData(data) {
         var $data = $(data);
         var $mainPageDiv = $data.filter( '.main-page' ).last();
         var $hpObj = $mainPageDiv.find( '.character-display-box' ).children( 'div' ).children( 'div' ).children( 'p' );
@@ -969,10 +1069,10 @@ var Config = function() {
     var dbConfigString = "configString";
     var dbConfigStringVal = "";
     // name of all scripts / features to be enabled
-    var scriptNames = [ "Debuff", "StatDisplay", "ExtraIcons", "MuteChat",
+    var scriptNames = [ "Debuff", "StatDisplay", "ExtraIcons", "Chat",
                         "NoRefresh", "TrackStats", "WeatherForecast",
                         "ItemList" ];
-    var scriptObjects = [ Debuff, StatDisplay, ExtraIcons, MuteChat,
+    var scriptObjects = [ Debuff, StatDisplay, ExtraIcons, Chat,
                           NoRefresh, TrackStats, WeatherForecast,
                           ItemList ];
 
@@ -1082,4 +1182,3 @@ var Config = function() {
 }();
 
 Config.init();
-NoRefresh2.init();
