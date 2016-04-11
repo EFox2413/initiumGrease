@@ -385,7 +385,6 @@ var Chat = function() {
         var updateTime = function(name, time) {
             nameList.forEach(function(entry, index) {
                 if (entry == name) {
-                    console.log(entry + ", " + time + " updated");
                     timeList[index] = time;
                 }
             });
@@ -397,7 +396,6 @@ var Chat = function() {
             var returnTime = "N/A";
             nameList.forEach(function(entry, index) {
                 if (entry == name) {
-                    console.log(entry + ", " + timeList[index] + " retrieved");
                     returnTime = timeList[index];
                 }
             });
@@ -497,13 +495,15 @@ var Chat = function() {
     };
 
     var updateUserListDiv = function(name) {
-        // checks if there is an element inside of user-list
-        //  of class name
-        if($('.user-list .' + name.replace(/[\s+\[\]]/g, '') ).length) {
-            $( '.' + name.replace(/[\s+\[\]]/g, '') ).replaceWith(getUserElement(name));
-        } else {
-            $( '.user-list' ).append(getUserElement(name) + '<br>');
-        }
+        name.forEach(function(entry) {
+            // checks if there is an element inside of user-list
+            //  of class name
+            if($('.user-list .' + entry.replace(/[\s+\[\]]/g, '') ).length) {
+                $( '.' + entry.replace(/[\s+\[\]]/g, '') ).replaceWith(getUserElement(entry));
+            } else {
+                $( '.user-list' ).append(getUserElement(entry) + '<br>');
+            }
+        });
     };
 
     var init = function() {
@@ -512,9 +512,22 @@ var Chat = function() {
             'style="position:absolute; ' +
             'top:27px; z-index:1111111;"></div>' );
 
+        // run function 2 seconds after pageload
+        var timerID = setTimeout(function() {
+            updateUserListDiv(UserList.getNames());
+            clearTimeout(timerID);
+            }, 1000*2);
+
+        // every five minutes update UserList Div
+        setInterval(function() {
+            updateUserListDiv(UserList.getNames());
+            }, 1000*60*5);
+
         // overrides the default onChatMessage function
         messager.onChatMessage = function(chatMessage) {
+            // gets nickname and sanitizes it of HTML
             var nName = getNickName(chatMessage.nickname);
+            // add name to userlist
             UserList.addName(nName);
 
             if (checkNameOnBanList(nName) == true) {
@@ -554,16 +567,12 @@ var Chat = function() {
                 var longDate = date.toLocaleDateString();
 
                 // updates the timestamp in our userlist
-                console.log("ShortTime: " + shortTime);
                 UserList.updateTime(nName, shortTime);
 
                 html+="<span class='chatMessage-time' title='"+longDate+"'>";
                 html+="["+shortTime+"] ";
                 html+="</span>";
             }
-
-            // updates the UserList div
-            updateUserListDiv(nName);
 
             if (chatMessage.code=="PrivateChat") {
                 html+="<a class='chatMessage-private-nickname' onclick='setPrivateChatTo(\""+chatMessage.nickname+"\", "+chatMessage.characterId+")'>"+chatMessage.nickname+"</a>";
