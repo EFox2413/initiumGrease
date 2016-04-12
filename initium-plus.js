@@ -363,6 +363,60 @@ var ExtraIcons = function() {
 var Chat = function() {
     var banList = [];
 
+    // NameList Object
+    //     addName(name)
+    //     delName(name)
+    //     isNewName(name)
+    //     getIndex(name)
+    //     getNames()
+    //     sortList()
+    function NameList() {
+        var nameList = [];
+
+        // adds the nickname to the list if it is a new name
+        var addName = function(name) {
+            if( isNewName ) {
+                nameList.push(name);
+            }
+        };
+
+        // removes the nickname from the list
+        var delName = function(name) {
+            var i = getIndex(name);
+
+            if (i !== null) {
+                nameList[i].remove();
+            }
+        };
+
+        // checks if the name is on the nameList already
+        var isNewName = function(name) {
+            return getIndex(name) === null;
+        };
+
+        // returns the index of the name in nameList, null if it is not found
+        var getIndex(name) {
+            var index = null;
+
+            for (var i = 0; i < nameList.length; i++) {
+                if (nameList[i] === name) {
+                    index = i;
+                }
+            }
+            return index;
+        };
+
+        // returns the array of names
+        var getNames = function() {
+            return nameList;
+        };
+
+        // sorts the list in alphabetical order
+        var sortList = function() {
+            nameList.sort();
+        };
+    }
+
     // array object of names and timestamps
     // UserList API:
     //      addName(name)
