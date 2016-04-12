@@ -361,8 +361,6 @@ var ExtraIcons = function() {
 
 // MUTE LIST
 var Chat = function() {
-    var banList = [];
-
     // NameList Object
     //     addName(name)
     //     delName(name)
@@ -370,7 +368,7 @@ var Chat = function() {
     //     getIndex(name)
     //     getNames()
     //     sortList()
-    function NameList() {
+    var NameList = function() {
         var nameList = [];
 
         // adds the nickname to the list if it is a new name
@@ -395,7 +393,7 @@ var Chat = function() {
         };
 
         // returns the index of the name in nameList, null if it is not found
-        var getIndex(name) {
+        var getIndex = function(name) {
             var index = null;
 
             for (var i = 0; i < nameList.length; i++) {
@@ -415,59 +413,67 @@ var Chat = function() {
         var sortList = function() {
             nameList.sort();
         };
-    }
 
-    // array object of names and timestamps
-    // UserList API:
-    //      addName(name)
+        var oPublic = {
+            addName: addName,
+            delName: delName,
+            isNewName: isNewName,
+            getIndex: getIndex,
+            getNames: getNames,
+            sortList: sortList,
+        };
+        return oPublic;
+    };
+
+    // extends NameList
+    //     addBan(name)
+    //     unBan(name)
+    //     getBanList()
+    //     checkNameOnBanList(name)
+    var BanList = function(){
+        var banList = new NameList();
+
+        // check if name is on ban list
+        var checkNameOnBanList = function( name ) {
+            return !banList.isNewName(name);
+        };
+
+        var oPublic = {
+            addBan: banList.addName,
+            unBan: banList.delName,
+            getBanlist: banList.getNames,
+            checkNameOnBanList: checkNameOnBanList,
+        };
+        return oPublic;
+    }();
+
+    // extends NameList()
     //      updateTime(name, time)
     //      getTime(name)
-    //      getNames()
     //      getTimes()
     var UserList = function() {
-        var nameList = [];
+        var nameList = new NameList();
         var timeList = [];
-
-        // adds the nickname to the list if it is a new name
-        var addName = function(name) {
-            if( isNewName ) {
-                nameList.push(name);
-            }
-        };
+        var addName = nameList.addName(name);
+        var getNames = nameList.getNames();
 
         // updates the timestamp for the name given
         var updateTime = function(name, time) {
-            nameList.forEach(function(entry, index) {
-                if (entry == name) {
-                    timeList[index] = time;
-                }
-            });
+            var i = nameList.getIndex(name);
+
+            if (i !== null) {
+                timeList[i] = time;
+            }
         };
 
         // gets the timestamp for the name
         //  if name is not on the list return "N/A"
         var getTime = function(name) {
-            var returnTime = "N/A";
-            nameList.forEach(function(entry, index) {
-                if (entry == name) {
-                    returnTime = timeList[index];
-                }
-            });
-            return returnTime;
-        };
+            var i = nameList.getIndex(name);
 
-        // checks if the name is on the nameList already
-        var isNewName = function(name) {
-            nameList.forEach(function(entry) {
-                if (entry === name) {
-                    return false;
-                }
-            });
-            return true;
-        };
-
-        var getNames = function() {
-            return nameList;
+            if (i !== null) {
+                return timeList[i];
+            }
         };
 
         var getTimes = function() {
@@ -476,52 +482,14 @@ var Chat = function() {
 
         // public functions
         var oPublic = {
-            addName: addName,
-            updateTime:updateTime,
+            addName: nameList.addName,
+            getNames: nameList.getNames,
+            updateTime: updateTime,
             getTime: getTime,
-            getNames: getNames,
             getTimes: getTimes,
         };
         return oPublic;
     }();
-
-    // add a ban
-    function addBan( name ) {
-        if (checkNameOnBanList( name )) {
-            return;
-        }
-        banList.push(name);
-    }
-
-    // remove a ban from banList
-    function unBan( name ) {
-        var removed = false;
-        banList.forEach( function( each, ind ) {
-            if (name.localeCompare(each) == 0) {
-                banList.splice(ind, 1);
-                removed = true;
-            }
-        });
-
-        if (removed === false) {
-        }
-    }
-
-    // mainly for debug, prints every item on banList
-    function getBanList() {
-        banList.forEach( function( each ) {
-        });
-    }
-
-    // check if name is on ban list
-    function checkNameOnBanList( name ) {
-        for (var i = 0; i < banList.length; i++) {
-            if ( banList[i].localeCompare(name) == 0 ) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     // verify the sender of message is the one playing the game
     function myMessage( id ) {
@@ -550,12 +518,14 @@ var Chat = function() {
 
     var updateUserListDiv = function(name) {
         name.forEach(function(entry) {
-            // checks if there is an element inside of user-list
-            //  of class name
-            if($('.user-list .' + entry.replace(/[\s+\[\]]/g, '') ).length) {
-                $( '.' + entry.replace(/[\s+\[\]]/g, '') ).replaceWith(getUserElement(entry));
-            } else {
-                $( '.user-list' ).append(getUserElement(entry) + '<br>');
+            if (entry !== "") {
+                // checks if there is an element inside of user-list
+                //  of class name
+                if($('.user-list .' + entry.replace(/[\s+\[\]]/g, '') ).length) {
+                    $( '.' + entry.replace(/[\s+\[\]]/g, '') ).replaceWith(getUserElement(entry));
+                } else {
+                    $( '.user-list' ).append(getUserElement(entry) + '<br>');
+                }
             }
         });
     };
@@ -584,7 +554,7 @@ var Chat = function() {
             // add name to userlist
             UserList.addName(nName);
 
-            if (checkNameOnBanList(nName) == true) {
+            if (BanList.checkNameOnBanList(nName) === true) {
                 return;
             }
 
@@ -595,7 +565,7 @@ var Chat = function() {
                     // Don't let me mute myself, while funny it prevents any mute and unmute functionality
                     //    Meaning that if I mute myself I will be unable to unmute myself or mute anyone else
                     if ( nName != chatMessage.message.substring(6) ) {
-                        addBan(chatMessage.message.substring(6));
+                        BanList.addBan(chatMessage.message.substring(6));
                     }
                 }
             }
@@ -603,7 +573,7 @@ var Chat = function() {
             // check if unmute command is sent
             if (chatMessage.message.startsWith('/unmute ')) {
                 if( myMessage(chatMessage.characterId )) {
-                    unBan(chatMessage.message.substring(8));
+                    BanList.unBan(chatMessage.message.substring(8));
                 }
             }
 
