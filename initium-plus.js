@@ -502,11 +502,6 @@ var Chat = function() {
         return false;
     }
 
-    function getNickName(name) {
-        name = name.replace(/<()[^<]+>/g,"");
-        return name;
-    }
-
     var getUserElement = function(name) {
         var HTML = "";
         // class name can't have spaces in it
@@ -549,8 +544,9 @@ var Chat = function() {
 
         // overrides the default onChatMessage function
         messager.onChatMessage = function(chatMessage) {
-            // gets nickname and sanitizes it of HTML
-            var nName = getNickName(chatMessage.nickname);
+            // gets nickname and gets rid of HTML
+            var nName = chatMessage.nickname.replace(/<()[^<]+>/g,'');
+
             // add name to userlist
             UserList.addName(nName);
 
