@@ -446,6 +446,7 @@ var Chat = function() {
 
     // adds name elements to the DOM as children to the UserListDiv
     var updateUserListDiv = function(name) {
+        name.sort();
         var HTML = "";
         console.log(name);
 
