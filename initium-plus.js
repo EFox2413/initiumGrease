@@ -361,135 +361,66 @@ var ExtraIcons = function() {
 
 // MUTE LIST
 var Chat = function() {
-    // NameList Object
-    //     addName(name)
-    //     delName(name)
-    //     isNewName(name)
-    //     getIndex(name)
-    //     getNames()
-    //     sortList()
-    var NameList = function() {
-        var nameList = [];
+    // keep track of muted people in this list
+    var muteList = [];
+    // keep track of messages and times sent by people on friendlist
+    //  store friends in friendList
+    var friendList = [];
+    // and most recent message time in timeList
+    var timeList = [];
 
-        // adds the nickname to the list if it is a new name
-        var addName = function(name) {
-            if( isNewName ) {
-                nameList.push(name);
-            }
-        };
-
-        // removes the nickname from the list
-        var delName = function(name) {
-            var i = getIndex(name);
-
-            if (i !== null) {
-                nameList[i].remove();
-            }
-        };
-
-        // checks if the name is on the nameList already
-        var isNewName = function(name) {
-            return getIndex(name) === null;
-        };
-
-        // returns the index of the name in nameList, null if it is not found
-        var getIndex = function(name) {
-            var index = null;
-
-            for (var i = 0; i < nameList.length; i++) {
-                if (nameList[i] === name) {
-                    index = i;
-                }
-            }
-            return index;
-        };
-
-        // returns the array of names
-        var getNames = function() {
-            return nameList;
-        };
-
-        // sorts the list in alphabetical order
-        var sortList = function() {
-            nameList.sort();
-        };
-
-        var oPublic = {
-            addName: addName,
-            delName: delName,
-            isNewName: isNewName,
-            getIndex: getIndex,
-            getNames: getNames,
-            sortList: sortList,
-        };
-        return oPublic;
+    // adds the nickname to the list if it is a new name
+    var addName = function(list, name) {
+        console.log("add name function for " + name);
+        if( isNewName(list, name) ) {
+            list.push(name);
+            console.log("added " + name);
+        }
     };
 
-    // extends NameList
-    //     addBan(name)
-    //     unBan(name)
-    //     getBanList()
-    //     checkNameOnBanList(name)
-    var BanList = function(){
-        var banList = new NameList();
+    // removes the nickname from the list
+    var delName = function(list, name) {
+        var i = getIndex(list, name);
+        if (i !== undefined) {
+            list[i].remove();
+        }
+    };
 
-        // check if name is on ban list
-        var checkNameOnBanList = function( name ) {
-            return !banList.isNewName(name);
-        };
+    // checks if the name is on the list already
+    var isNewName = function(list, name) {
+        console.log("isNewName " + name);
+        return getIndex(list, name) === undefined;
+    };
 
-        var oPublic = {
-            addBan: banList.addName,
-            unBan: banList.delName,
-            getBanlist: banList.getNames,
-            checkNameOnBanList: checkNameOnBanList,
-        };
-        return oPublic;
-    }();
-
-    // extends NameList()
-    //      updateTime(name, time)
-    //      getTime(name)
-    //      getTimes()
-    var UserList = function() {
-        var nameList = new NameList();
-        var timeList = [];
-        var addName = nameList.addName(name);
-        var getNames = nameList.getNames();
-
-        // updates the timestamp for the name given
-        var updateTime = function(name, time) {
-            var i = nameList.getIndex(name);
-
-            if (i !== null) {
-                timeList[i] = time;
+    // returns the index of the name in list, null if it is not found
+    var getIndex = function(list, name) {
+        console.log( "getIndex for " + name);
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] === name) {
+                console.log("index is " + i);
+                return i;
             }
-        };
+        }
+    };
 
-        // gets the timestamp for the name
-        //  if name is not on the list return "N/A"
-        var getTime = function(name) {
-            var i = nameList.getIndex(name);
+    // updates the timestamp for the friend given
+    var updateTime = function(name, time) {
+        var i = getIndex(friendList, name);
 
-            if (i !== null) {
-                return timeList[i];
-            }
-        };
+        if (i !== undefined) {
+            timeList[i] = time;
+        }
+    };
 
-        var getTimes = function() {
-            return timeList;
-        };
+    // gets the timestamp for the name
+    //  if name is not on the list return "N/A"
+    var getTime = function(name) {
+        var i = getIndex(friendList, name);
 
-        // public functions
-        var oPublic = {
-            addName: nameList.addName,
-            getNames: nameList.getNames,
-            updateTime: updateTime,
-            getTime: getTime,
-            getTimes: getTimes,
-        };
-        return oPublic;
-    }();
+        if (i !== undefined) {
+            return timeList[i];
+        }
+    };
 
     // verify the sender of message is the one playing the game
     function myMessage( id ) {
@@ -502,27 +433,28 @@ var Chat = function() {
         return false;
     }
 
+    // crafts the HTML string for friendList DOM addition
     var getUserElement = function(name) {
         var HTML = "";
         // class name can't have spaces in it
         HTML += '<span class="' + name.replace(/[\s+\[\]]/g, '') +
-            '">' + name + '   ' + UserList.getTime(name) + '</span>';
+            '">' + name + '   ' + getTime(name) + '</span>';
+        HTML += "<br>"
 
         return HTML;
     };
 
+    // adds name elements to the DOM as children to the UserListDiv
     var updateUserListDiv = function(name) {
+        var HTML = "";
+        console.log(name);
+
         name.forEach(function(entry) {
             if (entry !== "") {
-                // checks if there is an element inside of user-list
-                //  of class name
-                if($('.user-list .' + entry.replace(/[\s+\[\]]/g, '') ).length) {
-                    $( '.' + entry.replace(/[\s+\[\]]/g, '') ).replaceWith(getUserElement(entry));
-                } else {
-                    $( '.user-list' ).append(getUserElement(entry) + '<br>');
-                }
+                HTML += getUserElement(entry);
             }
         });
+        $( '.user-list' ).html(HTML);
     };
 
     var init = function() {
@@ -533,13 +465,13 @@ var Chat = function() {
 
         // run function 2 seconds after pageload
         var timerID = setTimeout(function() {
-            updateUserListDiv(UserList.getNames());
+            updateUserListDiv(friendList);
             clearTimeout(timerID);
             }, 1000*2);
 
         // every five minutes update UserList Div
         setInterval(function() {
-            updateUserListDiv(UserList.getNames());
+            updateUserListDiv(friendList);
             }, 1000*60*5);
 
         // overrides the default onChatMessage function
@@ -548,9 +480,12 @@ var Chat = function() {
             var nName = chatMessage.nickname.replace(/<()[^<]+>/g,'');
 
             // add name to userlist
-            UserList.addName(nName);
+            // TODO: Remove this
+            console.log("addName " + nName);
+            addName(friendList, nName);
 
-            if (BanList.checkNameOnBanList(nName) === true) {
+            // if name is on muteList, hide the message
+            if (isNewName(muteList, nName) === false) {
                 return;
             }
 
@@ -561,7 +496,7 @@ var Chat = function() {
                     // Don't let me mute myself, while funny it prevents any mute and unmute functionality
                     //    Meaning that if I mute myself I will be unable to unmute myself or mute anyone else
                     if ( nName != chatMessage.message.substring(6) ) {
-                        BanList.addBan(chatMessage.message.substring(6));
+                        addName(muteList, chatMessage.message.substring(6));
                     }
                 }
             }
@@ -569,7 +504,7 @@ var Chat = function() {
             // check if unmute command is sent
             if (chatMessage.message.startsWith('/unmute ')) {
                 if( myMessage(chatMessage.characterId )) {
-                    BanList.unBan(chatMessage.message.substring(8));
+                    delName(muteList, chatMessage.message.substring(8));
                 }
             }
 
@@ -587,7 +522,7 @@ var Chat = function() {
                 var longDate = date.toLocaleDateString();
 
                 // updates the timestamp in our userlist
-                UserList.updateTime(nName, shortTime);
+                updateTime(nName, shortTime);
 
                 html+="<span class='chatMessage-time' title='"+longDate+"'>";
                 html+="["+shortTime+"] ";
