@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            initium-plus
 // @namespace       https://github.com/EFox2413/initiumGrease
-// @version         0.0.1.0
+// @version         0.0.1.1
 // @updateURL       https://raw.githubusercontent.com/EFox2413/initiumGrease/master/initium-plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/EFox2413/initiumGrease/master/initium-plus.js
 // @supportURL      https://github.com/EFox2413/initiumGrease/issues
@@ -830,20 +830,18 @@ var TrackStats = function() {
 
     //Add Stat Tracking logic
     function addTracking() {
-        //Get attack buttons
-        var attackButtons = $('.main-buttonbox a[href*="ServletCharacterControl?type=attack"]');
-
-        //Iterate through attack buttons
-        $.each(attackButtons, function(index,item) {
-            //Save current buttons action link(right hand attack or left hand attack)
-            var attackURL = item.href;
-
-            //Remove current link
-            item.href = "#";
-
-            //Bind click to tracking with previous attack link as argument
-            $(item).on("click",{ atkurl : attackURL },tracking);
-        });
+        // attack buttons
+        var attackButton1 = $('.main-buttonbox a')[0];
+        var attackButton2 = $('.main-buttonbox a')[1];
+        // attack urls
+        var attackRightHandURL = 'ServletCharacterControl?type=attack&hand=RightHand';
+        var attackLeftHandURL = 'ServletCharacterControl?type=attack&hand=LeftHand';
+        // remove current click listener
+        $(attackButton1).attr( 'shortcut', '');
+        $(attackButton2).attr( 'shortcut', '');
+        // add click listener
+        $(attackButton1).on("click",{ atkurl : attackRightHandURL },tracking);
+        $(attackButton2).on("click",{ atkurl : attackLeftHandURL },tracking);
     }
 
     function tracking(event) {
@@ -1082,4 +1080,3 @@ var Config = function() {
 }();
 
 Config.init();
-NoRefresh2.init();
