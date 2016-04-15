@@ -293,8 +293,6 @@ var WeatherForecast = function() {
 }();
 
 // DISPLAY STATS
-// TODO since this uses the same ajax call as in
-//      stats tracking, might as well call the same fn
 var StatDisplay = function() {
     var charDiv = $('.character-display-box').children(" div:nth-child(3)").children( 'a' );
     var statsItems;
@@ -360,6 +358,7 @@ var ExtraIcons = function() {
 }();
 
 // MUTE LIST
+//  TODO Make muteList and friendList persistent between sessions
 var Chat = function() {
     // keep track of muted people in this list
     var muteList = [];
@@ -371,7 +370,6 @@ var Chat = function() {
 
     // adds the nickname to the list if it is a new name
     var addName = function(list, name) {
-        console.log("add name function for " + name);
         if( isNewName(list, name) ) {
             list.push(name);
             console.log("added " + name);
@@ -388,13 +386,11 @@ var Chat = function() {
 
     // checks if the name is on the list already
     var isNewName = function(list, name) {
-        console.log("isNewName " + name);
         return getIndex(list, name) === undefined;
     };
 
     // returns the index of the name in list, null if it is not found
     var getIndex = function(list, name) {
-        console.log( "getIndex for " + name);
         for (var i = 0; i < list.length; i++) {
             if (list[i] === name) {
                 console.log("index is " + i);
@@ -448,7 +444,6 @@ var Chat = function() {
     var updateUserListDiv = function(name) {
         name.sort();
         var HTML = "";
-        console.log(name);
 
         name.forEach(function(entry) {
             if (entry !== "") {
@@ -482,7 +477,6 @@ var Chat = function() {
 
             // add name to userlist
             // TODO: Remove this
-            console.log("addName " + nName);
             addName(friendList, nName);
 
             // if name is on muteList, hide the message
@@ -494,10 +488,11 @@ var Chat = function() {
             if (chatMessage.message.startsWith('/mute ')) {
                 // Am I the sender of the message?
                 if ( myMessage(chatMessage.characterId )) {
+                    var muteName = chatMessage.message.substring(6);
+
                     // Don't let me mute myself, while funny it prevents any mute and unmute functionality
-                    //    Meaning that if I mute myself I will be unable to unmute myself or mute anyone else
-                    if ( nName != chatMessage.message.substring(6) ) {
-                        addName(muteList, chatMessage.message.substring(6));
+                    if ( nName != muteName ) {
+                        addName(muteList, muteName);
                     }
                 }
             }
@@ -506,6 +501,26 @@ var Chat = function() {
             if (chatMessage.message.startsWith('/unmute ')) {
                 if( myMessage(chatMessage.characterId )) {
                     delName(muteList, chatMessage.message.substring(8));
+                }
+            }
+
+            // check if add friend command is sent
+            if (chatMessage.message.startsWith('/add ')) {
+                // Don't mute based off of other people's messages
+                if ( myMessage(chatMessage.characterId )) {
+                    var friendName = chatMessage.message.substring(5);
+
+                    // Don't let me add myself, because that's silly
+                    if ( nName != friendName ) {
+                        addName(friendList, friendName);
+                    }
+                }
+            }
+
+            // check if unadd command is sent
+            if (chatMessage.message.startsWith('/unadd ')) {
+                if( myMessage(chatMessage.characterId )) {
+                    delName(friendList, chatMessage.message.substring(7));
                 }
             }
 
@@ -1034,7 +1049,7 @@ var Config = function() {
     var dbConfigString = "configString";
     var dbConfigStringVal = "";
     // name of all scripts / features to be enabled
-    var scriptNames = [ "Debuff", "StatDisplay", "ExtraIcons", "Chat",
+    var scriptNames = [ "Debuff", "StatDisplay", "ExtraIcons", "Chat+",
                         "NoRefresh", "TrackStats", "WeatherForecast",
                         "ItemList" ];
     var scriptObjects = [ Debuff, StatDisplay, ExtraIcons, Chat,
