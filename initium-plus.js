@@ -365,14 +365,17 @@ var Chat = function() {
     // keep track of messages and times sent by people on friendlist
     //  store friends in friendList
     var friendList = [];
-    // and most recent message time in timeList
-    var timeList = [];
+
+    // name time object for friend / userlist
+    var NameTimeObj = function(name) {
+        this.name = name;
+        this.time = '';
+    };
 
     // adds the nickname to the list if it is a new name
     var addName = function(list, name) {
-        if( isNewName(list, name) ) {
+        if( isNewName(list, name) && name ) {
             list.push(name);
-            console.log("added " + name);
         }
     };
 
@@ -390,11 +393,15 @@ var Chat = function() {
     };
 
     // returns the index of the name in list, null if it is not found
+    // TODO: Find a cleaner way to do distinguish between mutelist and NameTimeObj
     var getIndex = function(list, name) {
         for (var i = 0; i < list.length; i++) {
-            if (list[i] === name) {
-                console.log("index is " + i);
-                return i;
+            if (name.name === undefined) {
+                if (list[i] === name) {
+                    return i;
+                }
+            } else if (list[i].name === name.name) {
+                return i
             }
         }
     };
@@ -403,8 +410,10 @@ var Chat = function() {
     var updateTime = function(name, time) {
         var i = getIndex(friendList, name);
 
+        console.log( "i is " + i);
         if (i !== undefined) {
-            timeList[i] = time;
+            console.log(name + " time is set to " + time);
+            friendList[i].time = time;
         }
     };
 
@@ -414,7 +423,7 @@ var Chat = function() {
         var i = getIndex(friendList, name);
 
         if (i !== undefined) {
-            return timeList[i];
+            return friendList[i].time;
         }
     };
 
@@ -429,23 +438,42 @@ var Chat = function() {
         return false;
     }
 
+    // gets time difference in multiples of 5 mins from time tied to name
+    var getTimeDiff = function(time) {
+        // time difference
+        var timeDiff = (new Date()).getTime() - time;
+        // convert to minutes
+        timeDiff = timeDiff/1000/60;
+        // round to nearest 5 minutes
+        timeDiff = Math.round(timeDiff/5)*5;
+
+        return timeDiff;
+    };
+
     // crafts the HTML string for friendList DOM addition
-    var getUserElement = function(name) {
+    var getUserElement = function(nameTimeObj) {
         var HTML = "";
         // class name can't have spaces in it
-        HTML += '<span class="' + name.replace(/[\s+\[\]]/g, '') +
-            '">' + name + '   ' + getTime(name) + '</span>';
+        HTML += '<span class="' + nameTimeObj.name.replace(/[\s+\[\]]/g, '') +
+            '">' + nameTimeObj.name + '</span><span style="float:right">' +
+            getTimeDiff(nameTimeObj.time) + ' min</span>';
         HTML += "<br>"
 
         return HTML;
     };
 
     // adds name elements to the DOM as children to the UserListDiv
-    var updateUserListDiv = function(name) {
-        name.sort();
-        var HTML = "";
+    // TODO: make the css work based off of relative and not absolute values
+    //          right now it's only likely to look good on my screen
+    var updateUserListDiv = function(nameTimeObjArr) {
+        nameTimeObjArr.sort(function(a, b) {
+            if (a.name < b.name) return -1;
+            else if (a.name > b.name) return 1;
+            else return 0;
+        });
+        var HTML = "<center><h3>User List</h3></center>";
 
-        name.forEach(function(entry) {
+        nameTimeObjArr.forEach(function(entry) {
             if (entry !== "") {
                 HTML += getUserElement(entry);
             }
@@ -455,15 +483,15 @@ var Chat = function() {
 
     var init = function() {
         // adds UserList div to the DOM
-        $( '.mobile-spacer' ).append( '<div class="user-list" ' +
-            'style="position:absolute; ' +
-            'top:27px; z-index:1111111;"></div>' );
+        $( '.mobile-spacer' ).append( '<div class="user-list page-popup" ' +
+            'style="width:280px; height:500px; display:inline-block; position:absolute; top:27px; z-index:1111111;">' +
+            '</div>' );
 
         // run function 2 seconds after pageload
         var timerID = setTimeout(function() {
             updateUserListDiv(friendList);
             clearTimeout(timerID);
-            }, 1000*2);
+            }, 1000*5);
 
         // every five minutes update UserList Div
         setInterval(function() {
@@ -475,9 +503,11 @@ var Chat = function() {
             // gets nickname and gets rid of HTML
             var nName = chatMessage.nickname.replace(/<()[^<]+>/g,'');
 
+            var nameTimeObj = new NameTimeObj(nName);
+
             // add name to userlist
             // TODO: Remove this
-            addName(friendList, nName);
+            addName(friendList, nameTimeObj);
 
             // if name is on muteList, hide the message
             if (isNewName(muteList, nName) === false) {
@@ -508,7 +538,7 @@ var Chat = function() {
             if (chatMessage.message.startsWith('/add ')) {
                 // Don't mute based off of other people's messages
                 if ( myMessage(chatMessage.characterId )) {
-                    var friendName = chatMessage.message.substring(5);
+                    var friendName = new NameTimeObj(chatMessage.message.substring(5));
 
                     // Don't let me add myself, because that's silly
                     if ( nName != friendName ) {
@@ -525,20 +555,24 @@ var Chat = function() {
             }
 
             var html = "<div class='chatMessage-main'>";
+
             if (chatMessage.createdDate !== null) {
                 var date = new Date(chatMessage.createdDate);
                 var shortTime = date.toLocaleTimeString();
                 var cutoff = shortTime.length;
-                if (shortTime.indexOf(":")>0)
+
+                // updates the timestamp in our userlist
+                updateTime(nameTimeObj, date.getTime());
+
+                if (shortTime.indexOf(":")>0) {
                     cutoff = shortTime.lastIndexOf(":");
-                else if (shortTime.indexOf(".")>0)
+                } else if (shortTime.indexOf(".")>0) {
                     cutoff = shortTime.lastIndexOf(".");
+                }
 
                 shortTime = shortTime.substring(0, cutoff);
                 var longDate = date.toLocaleDateString();
 
-                // updates the timestamp in our userlist
-                updateTime(nName, shortTime);
 
                 html+="<span class='chatMessage-time' title='"+longDate+"'>";
                 html+="["+shortTime+"] ";
