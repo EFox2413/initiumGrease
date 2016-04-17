@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            initium-plus
 // @namespace       https://github.com/EFox2413/initiumGrease
-// @version         0.0.1.1
+// @version         0.0.1.2
 // @updateURL       https://raw.githubusercontent.com/EFox2413/initiumGrease/master/initium-plus.meta.js
 // @downloadURL     https://raw.githubusercontent.com/EFox2413/initiumGrease/master/initium-plus.js
 // @supportURL      https://github.com/EFox2413/initiumGrease/issues
@@ -359,7 +359,7 @@ var ExtraIcons = function() {
 
 // MUTE LIST
 //  TODO Make muteList and friendList persistent between sessions
-var Chat = function() {
+var ChatPlus = function() {
     // keep track of muted people in this list
     var muteList = [];
     // keep track of messages and times sent by people on friendlist
@@ -1104,10 +1104,10 @@ var Config = function() {
     var dbConfigString = "configString";
     var dbConfigStringVal = "";
     // name of all scripts / features to be enabled
-    var scriptNames = [ "Debuff", "StatDisplay", "ExtraIcons", "Chat+",
+    var scriptNames = [ "Debuff", "StatDisplay", "ExtraIcons", "ChatPlus",
                         "NoRefresh", "TrackStats", "WeatherForecast",
                         "ItemList" ];
-    var scriptObjects = [ Debuff, StatDisplay, ExtraIcons, Chat,
+    var scriptObjects = [ Debuff, StatDisplay, ExtraIcons, ChatPlus,
                           NoRefresh, TrackStats, WeatherForecast,
                           ItemList ];
 
