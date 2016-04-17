@@ -484,8 +484,9 @@ var Chat = function() {
     var init = function() {
         // adds UserList div to the DOM
         $( '.mobile-spacer' ).append( '<div class="user-list page-popup" ' +
-            'style="width:280px; height:500px; display:inline-block; position:absolute; top:27px; z-index:1111111;">' +
-            '</div>' );
+            'style="width:20%; margin:0; padding-top:0px; top:60px;' +
+            'bottom:auto; display:inline-block; position:absolute; ' +
+            'z-index:1111111;"></div>' );
 
         // run function 2 seconds after pageload
         var timerID = setTimeout(function() {
