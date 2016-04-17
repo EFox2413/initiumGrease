@@ -293,8 +293,6 @@ var WeatherForecast = function() {
 }();
 
 // DISPLAY STATS
-// TODO since this uses the same ajax call as in
-//      stats tracking, might as well call the same fn
 var StatDisplay = function() {
     var charDiv = $('.character-display-box').children(" div:nth-child(3)").children( 'a' );
     var statsItems;
@@ -360,46 +358,74 @@ var ExtraIcons = function() {
 }();
 
 // MUTE LIST
-var MuteChat = function() {
-    var banList = [];
+//  TODO Make muteList and friendList persistent between sessions
+var Chat = function() {
+    // keep track of muted people in this list
+    var muteList = [];
+    // keep track of messages and times sent by people on friendlist
+    //  store friends in friendList
+    var friendList = [];
 
-    // add a ban
-    function addBan( name ) {
-        if (checkNameOnBanList( name )) {
-            return;
+    // name time object for friend / userlist
+    var NameTimeObj = function(name) {
+        this.name = name;
+        this.time = '';
+    };
+
+    // adds the nickname to the list if it is a new name
+    var addName = function(list, name) {
+        if( isNewName(list, name) && name ) {
+            list.push(name);
         }
-        banList.push(name);
-    }
+    };
 
-    // remove a ban from banList
-    function unBan( name ) {
-        var removed = false;
-        banList.forEach( function( each, ind ) {
-            if (name.localeCompare(each) == 0) {
-                banList.splice(ind, 1);
-                removed = true;
+    // removes the nickname from the list
+    var delName = function(list, name) {
+        var i = getIndex(list, name);
+        if (i !== undefined) {
+            list[i].remove();
+        }
+    };
+
+    // checks if the name is on the list already
+    var isNewName = function(list, name) {
+        return getIndex(list, name) === undefined;
+    };
+
+    // returns the index of the name in list, null if it is not found
+    // TODO: Find a cleaner way to do distinguish between mutelist and NameTimeObj
+    var getIndex = function(list, name) {
+        for (var i = 0; i < list.length; i++) {
+            if (name.name === undefined) {
+                if (list[i] === name) {
+                    return i;
+                }
+            } else if (list[i].name === name.name) {
+                return i
             }
-        });
-
-        if (removed === false) {
         }
-    }
+    };
 
-    // mainly for debug, prints every item on banList
-    function getBanList() {
-        banList.forEach( function( each ) {
-        });
-    }
+    // updates the timestamp for the friend given
+    var updateTime = function(name, time) {
+        var i = getIndex(friendList, name);
 
-    // check if name is on ban list
-    function checkNameOnBanList( name ) {
-        for (var i = 0; i < banList.length; i++) {
-            if ( banList[i].localeCompare(name) == 0 ) {
-                return true;
-            }
+        console.log( "i is " + i);
+        if (i !== undefined) {
+            console.log(name + " time is set to " + time);
+            friendList[i].time = time;
         }
-        return false;
-    }
+    };
+
+    // gets the timestamp for the name
+    //  if name is not on the list return "N/A"
+    var getTime = function(name) {
+        var i = getIndex(friendList, name);
+
+        if (i !== undefined) {
+            return friendList[i].time;
+        }
+    };
 
     // verify the sender of message is the one playing the game
     function myMessage( id ) {
@@ -412,17 +438,96 @@ var MuteChat = function() {
         return false;
     }
 
-    function getNickName(name) {
-        name = name.replace(/<()[^<]+>/g,"");
-        return name;
-    }
+    // gets time difference in multiples of 5 mins from time tied to name
+    //   if it is over 60 min it will round to nearest hour
+    var getTimeDiff = function(time) {
+        // time difference
+        var timeDiffStr = "";
+        var timeDiff = (new Date()).getTime() - time;
+
+        // convert to minutes
+        timeDiff = timeDiff/1000/60;
+        // round to nearest 5 minutes
+        timeDiff = Math.round(timeDiff/5)*5;
+        timeDiffStr = timeDiff + ' min';
+
+        if (timeDiff >= 60) {
+            timeDiff = Math.round(timeDiff/60);
+            timeDiffStr = timeDiff + ' hr';
+        }
+
+        return timeDiffStr;
+    };
+
+    // crafts the HTML string for friendList DOM addition
+    var getUserElement = function(nameTimeObj) {
+        var HTML = "";
+        var plainName = nameTimeObj.name.replace(/[\s+\[\]]/g, '');
+
+        // if name is blank string, return without HTML
+        if (plainName === "") {
+            return HTML
+        }
+
+        // class name can't have spaces in it
+        HTML += '<span class="' + plainName +
+            '">' + nameTimeObj.name.substr(0,25) + '</span><span style="float:right">' +
+            getTimeDiff(nameTimeObj.time) + '</span>';
+        HTML += "<br>"
+
+        return HTML;
+    };
+
+    // adds name elements to the DOM as children to the UserListDiv
+    // TODO: make the css work based off of relative and not absolute values
+    //          right now it's only likely to look good on my screen
+    var updateUserListDiv = function(nameTimeObjArr) {
+        nameTimeObjArr.sort(function(a, b) {
+            if (a.name < b.name) return -1;
+            else if (a.name > b.name) return 1;
+            else return 0;
+        });
+        var HTML = "<center><h3>User List</h3></center>";
+
+        nameTimeObjArr.forEach(function(entry) {
+            if (entry !== "") {
+                HTML += getUserElement(entry);
+            }
+        });
+        $( '.user-list' ).html(HTML);
+    };
 
     var init = function() {
-        // override the native function
-        messager.onChatMessage = function(chatMessage) {
-            var nName = getNickName(chatMessage.nickname);
+        // adds UserList div to the DOM
+        $( '.mobile-spacer' ).append( '<div class="user-list page-popup" ' +
+            'style="width:20%; margin:0; padding-top:0px; top:60px;' +
+            'bottom:auto; display:inline-block; position:absolute; ' +
+            'z-index:1111111;"></div>' );
 
-            if (checkNameOnBanList(nName) == true) {
+        // run function 2 seconds after pageload
+        var timerID = setTimeout(function() {
+            updateUserListDiv(friendList);
+            clearTimeout(timerID);
+            }, 1000*5);
+
+        // every five minutes update UserList Div
+        setInterval(function() {
+            updateUserListDiv(friendList);
+            }, 1000*60*5);
+
+        // overrides the default onChatMessage function
+        messager.onChatMessage = function(chatMessage) {
+            // gets nickname and gets rid of HTML
+            var nName = chatMessage.nickname.replace(/<()[^<]+>/g,'');
+
+            var nameTimeObj = new NameTimeObj(nName);
+
+            // add name to userlist
+            // TODO: Remove this
+            addName(friendList, nameTimeObj);
+
+            // if name is on muteList, hide the message
+            if (isNewName(muteList, nName) === false) {
                 return;
             }
 
@@ -430,10 +535,11 @@ var MuteChat = function() {
             if (chatMessage.message.startsWith('/mute ')) {
                 // Am I the sender of the message?
                 if ( myMessage(chatMessage.characterId )) {
+                    var muteName = chatMessage.message.substring(6);
+
                     // Don't let me mute myself, while funny it prevents any mute and unmute functionality
-                    //    Meaning that if I mute myself I will be unable to unmute myself or mute anyone else
-                    if ( nName != chatMessage.message.substring(6) ) {
-                        addBan(chatMessage.message.substring(6));
+                    if ( nName != muteName ) {
+                        addName(muteList, muteName);
                     }
                 }
             }
@@ -441,30 +547,56 @@ var MuteChat = function() {
             // check if unmute command is sent
             if (chatMessage.message.startsWith('/unmute ')) {
                 if( myMessage(chatMessage.characterId )) {
-                    unBan(chatMessage.message.substring(8));
+                    delName(muteList, chatMessage.message.substring(8));
+                }
+            }
+
+            // check if add friend command is sent
+            if (chatMessage.message.startsWith('/add ')) {
+                // Don't mute based off of other people's messages
+                if ( myMessage(chatMessage.characterId )) {
+                    var friendName = new NameTimeObj(chatMessage.message.substring(5));
+
+                    // Don't let me add myself, because that's silly
+                    if ( nName != friendName ) {
+                        addName(friendList, friendName);
+                    }
+                }
+            }
+
+            // check if unadd command is sent
+            if (chatMessage.message.startsWith('/unadd ')) {
+                if( myMessage(chatMessage.characterId )) {
+                    delName(friendList, chatMessage.message.substring(7));
                 }
             }
 
             var html = "<div class='chatMessage-main'>";
-            if (chatMessage.createdDate!=null)
-            {
+
+            if (chatMessage.createdDate !== null) {
                 var date = new Date(chatMessage.createdDate);
                 var shortTime = date.toLocaleTimeString();
                 var cutoff = shortTime.length;
-                if (shortTime.indexOf(":")>0)
+
+                // updates the timestamp in our userlist
+                updateTime(nameTimeObj, date.getTime());
+
+                if (shortTime.indexOf(":")>0) {
                     cutoff = shortTime.lastIndexOf(":");
-                else if (shortTime.indexOf(".")>0)
+                } else if (shortTime.indexOf(".")>0) {
                     cutoff = shortTime.lastIndexOf(".");
+                }
 
                 shortTime = shortTime.substring(0, cutoff);
                 var longDate = date.toLocaleDateString();
+
 
                 html+="<span class='chatMessage-time' title='"+longDate+"'>";
                 html+="["+shortTime+"] ";
                 html+="</span>";
             }
-            if (chatMessage.code=="PrivateChat")
-            {
+
+            if (chatMessage.code=="PrivateChat") {
                 html+="<a class='chatMessage-private-nickname' onclick='setPrivateChatTo(\""+chatMessage.nickname+"\", "+chatMessage.characterId+")'>"+chatMessage.nickname+"</a>";
                 html+="<span class='chatMessage-text'>";
                 html+=" ";
@@ -512,7 +644,6 @@ var MuteChat = function() {
     var oPublic = {
         init: init,
     };
-
     return oPublic;
 }();
 
@@ -691,12 +822,12 @@ var NoRefresh = function() {
     function getData(actionURL) {
         $.get(actionURL)
          .done(function(data) {
-            processCombatData(data);
+            processData(data);
         });
     }
 
     // Gets the hp values and the battle description from the returned data
-    function processCombatData(data) {
+    function processData(data) {
         var $data = $(data);
         var $mainPageDiv = $data.filter( '.main-page' ).last();
         var $hpObj = $mainPageDiv.find( '.character-display-box' ).children( 'div' ).children( 'div' ).children( 'p' );
@@ -973,10 +1104,10 @@ var Config = function() {
     var dbConfigString = "configString";
     var dbConfigStringVal = "";
     // name of all scripts / features to be enabled
-    var scriptNames = [ "Debuff", "StatDisplay", "ExtraIcons", "MuteChat",
+    var scriptNames = [ "Debuff", "StatDisplay", "ExtraIcons", "Chat+",
                         "NoRefresh", "TrackStats", "WeatherForecast",
                         "ItemList" ];
-    var scriptObjects = [ Debuff, StatDisplay, ExtraIcons, MuteChat,
+    var scriptObjects = [ Debuff, StatDisplay, ExtraIcons, Chat,
                           NoRefresh, TrackStats, WeatherForecast,
                           ItemList ];
 
