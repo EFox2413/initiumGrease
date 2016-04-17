@@ -439,24 +439,40 @@ var Chat = function() {
     }
 
     // gets time difference in multiples of 5 mins from time tied to name
+    //   if it is over 60 min it will round to nearest hour
     var getTimeDiff = function(time) {
         // time difference
+        var timeDiffStr = "";
         var timeDiff = (new Date()).getTime() - time;
+
         // convert to minutes
         timeDiff = timeDiff/1000/60;
         // round to nearest 5 minutes
         timeDiff = Math.round(timeDiff/5)*5;
+        timeDiffStr = timeDiff + ' min';
 
-        return timeDiff;
+        if (timeDiff >= 60) {
+            timeDiff = Math.round(timeDiff/60);
+            timeDiffStr = timeDiff + ' hr';
+        }
+
+        return timeDiffStr;
     };
 
     // crafts the HTML string for friendList DOM addition
     var getUserElement = function(nameTimeObj) {
         var HTML = "";
+        var plainName = nameTimeObj.name.replace(/[\s+\[\]]/g, '');
+
+        // if name is blank string, return without HTML
+        if (plainName === "") {
+            return HTML
+        }
+
         // class name can't have spaces in it
-        HTML += '<span class="' + nameTimeObj.name.replace(/[\s+\[\]]/g, '') +
-            '">' + nameTimeObj.name + '</span><span style="float:right">' +
-            getTimeDiff(nameTimeObj.time) + ' min</span>';
+        HTML += '<span class="' + plainName +
+            '">' + nameTimeObj.name.substr(0,25) + '</span><span style="float:right">' +
+            getTimeDiff(nameTimeObj.time) + '</span>';
         HTML += "<br>"
 
         return HTML;
