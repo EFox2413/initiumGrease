@@ -23,6 +23,7 @@ var $ = window.jQuery;
 // UTIL
 //   mkPopup(content);
 //   checkNight();
+//   version;
 var Util = function() {
     // creates a popup with HTML content
     var mkPopup = function(content) {
@@ -75,6 +76,8 @@ var Util = function() {
         }
     };
 
+    var version = '0.0.1.2';
+
     // checks if current in-game time is night
     var checkNight = function() {
         var randConstant = 318.47133757961783439490445859873;
@@ -87,6 +90,7 @@ var Util = function() {
     var oPublic = {
         mkPopup: mkPopup,
         checkNight: checkNight,
+        version: version,
     };
     return oPublic;
 }();
@@ -1164,7 +1168,8 @@ var Config = function() {
 
     // makes the config Popup
     var showConfigMenu = function() {
-        var popTitle = "<center><h2>Initium+ Configuration</h3></center>";
+        var popTitle = "<center><h2>Initium+ Configuration</h3></center>" +
+                       "<center><h5>v" + Util.version + "</h5></center>";
         var popSubText = "<center><h5>You will need to refresh the webpage " +
             "for the changes to take effect. Press C to bring up this menu.</h5></center>";
         var popContent = "";
