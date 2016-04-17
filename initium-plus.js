@@ -830,18 +830,24 @@ var TrackStats = function() {
 
     //Add Stat Tracking logic
     function addTracking() {
+        var currentURL = window.location.href;
+        currentURL = currentURL.substring(0, currentURL.indexOf('main.js'));
+
         // attack buttons
         var attackButton1 = $('.main-buttonbox a')[0];
         var attackButton2 = $('.main-buttonbox a')[1];
+
         // attack urls
-        var attackRightHandURL = 'ServletCharacterControl?type=attack&hand=RightHand';
-        var attackLeftHandURL = 'ServletCharacterControl?type=attack&hand=LeftHand';
+        var attackRightHandURL = currentURL + 'ServletCharacterControl?type=attack&hand=RightHand';
+        var attackLeftHandURL = currentURL + 'ServletCharacterControl?type=attack&hand=LeftHand';
+
         // remove current click listener
         $(attackButton1).attr( 'shortcut', '');
         $(attackButton2).attr( 'shortcut', '');
+
         // add click listener
-        $(attackButton1).on("click",{ atkurl : attackRightHandURL },tracking);
-        $(attackButton2).on("click",{ atkurl : attackLeftHandURL },tracking);
+        $(attackButton1).on("click", { atkurl : attackRightHandURL }, tracking);
+        $(attackButton2).on("click", { atkurl : attackLeftHandURL }, tracking);
     }
 
     function tracking(event) {
