@@ -966,7 +966,12 @@ var TrackStats = function() {
     //Add Stat Tracking logic
     function addTracking() {
         var currentURL = window.location.href;
-        currentURL = currentURL.substring(0, currentURL.indexOf('main.js'));
+
+        // if not on combat page, do not execute
+        if ( !currentURL.includes('combat.js') ) {
+            return;
+        }
+        currentURL = currentURL.substring(0, currentURL.indexOf('combat.js'));
 
         // attack buttons
         var attackButton1 = $('.main-buttonbox a')[0];
@@ -977,8 +982,8 @@ var TrackStats = function() {
         var attackLeftHandURL = currentURL + 'ServletCharacterControl?type=attack&hand=LeftHand';
 
         // remove current click listener
-        $(attackButton1).attr( 'shortcut', '');
-        $(attackButton2).attr( 'shortcut', '');
+        $(attackButton1).removeAttr( 'shortcut');
+        $(attackButton2).removeAttr( 'shortcut');
 
         // add click listener
         $(attackButton1).on("click", { atkurl : attackRightHandURL }, tracking);
