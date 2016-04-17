@@ -4,6 +4,8 @@
 Script:
 - [Initium+](https://raw.githubusercontent.com/EFox2413/initiumGrease/master/initium-plus.js)
 
+![Image of Script Display](http://i.imgur.com/sHl9lZj.png)
+
 Feature Status:
 -  :white_check_mark: WeatherForecast
 -  :white_check_mark: StatsDisplay
