@@ -98,7 +98,6 @@ var Util = function() {
 //-------------------------FEATURES-------------------------\\
 
 // DEBUFF
-//   init();
 var Debuff = function() {
     // get the charbox div of the player
     var charBox = $( '.character-display-box' ).first();
@@ -211,7 +210,6 @@ var Debuff = function() {
 }();
 
 // WEATHER FORECAST
-//   init();
 var WeatherForecast = function() {
     // Weather ratio from getWeather function in server js file...
     var weatherInt = getWeather();
@@ -363,6 +361,7 @@ var ExtraIcons = function() {
 
 // MUTE LIST
 //  TODO Make muteList and friendList persistent between sessions
+//       Add change to mutelist link to the current userlist/friendlist
 var ChatPlus = function() {
     // keep track of muted people in this list
     var muteList = [];
