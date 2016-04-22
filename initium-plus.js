@@ -696,7 +696,7 @@ var ItemList = function() {
     function divSeparate(itemArray) {
         // separates out the name from the html for each item
         var nameArray = itemArray.map(function(entry) {
-            var regexp = /name"\>((?:\w{0,15}\s*){0,10})\</;
+            var regexp = /name"\>((?:\w*\s*)*)\</;
             var textArray = regexp.exec(entry);
 
             return textArray[1];
@@ -733,7 +733,6 @@ var ItemList = function() {
     var oPublic = {
         init: init,
     };
-
     return oPublic;
 }();
 
