@@ -678,9 +678,17 @@ var ItemList = function() {
         textArray.pop();
 
         textArray = divSeparate(textArray);
+        textArray = textArray.map(function(entry){
+            var sortedArray = sortByQuality(entry);
+            return sortedArray;
+        });
+
         var rightHTML = '';
 
+        console.log(textArray);
+
         textArray.forEach(function(entry) {
+            console.log("TextArray entry: " + entry);
             var length = entry.length;
             rightHTML += entry.pop() + '(' + length + ')';
             rightHTML += '<br>';
@@ -689,20 +697,47 @@ var ItemList = function() {
         $nearbyItemsDiv.html(rightHTML);
     };
 
+    function sortByQuality(itemHTMLArray) {
+        itemHTMLArray.sort(function(a, b) {
+            var aQual = parseForQuality(a);
+            var bQual = parseForQuality(b);
+
+            if (aQual > bQual) {return 1;}
+            if (bQual > aQual) {return -1;}
+
+            return 0;
+        });
+        console.log(itemHTMLArray);
+        return itemHTMLArray;
+    }
+
+    function parseForQuality(itemHTML) {
+        var regexp = /clue\sitem-(\w*)/;
+        var parsedTextArray = regexp.exec(itemHTML);
+
+        // change name of epic to begin with z so i can just sort by alphabet
+        if (parsedTextArray == null) {
+            return 'normal';
+        }
+        if (parsedTextArray[1] === 'epic') {
+            parsedTextArray[1] = 'zepic';
+        }
+        return parsedTextArray[1];
+    }
+
     // itemArray - array of html contents for each entry in Nearby Items (#right)
     //
     // returns arrays for each item name with each item in the appropriate array
     //  ex: an array of (an array of swords, an array of shoes, an array of rapiers)
     function divSeparate(itemArray) {
-        // separates out the name from the html for each item
+        var uniqItemStack = [];
+        // gets the item name from the html for each item
         var nameArray = itemArray.map(function(entry) {
             var regexp = /name"\>((?:\w*\s*)*)\</;
             var textArray = regexp.exec(entry);
 
             return textArray[1];
         });
-
-        var uniqItemStack = [];
 
         // filters out all duplicate names
         var uniqItemNameStack = nameArray.slice().sort().filter(function(entry, ind, array) {
