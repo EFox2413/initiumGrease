@@ -652,141 +652,83 @@ var ChatPlus = function() {
 
 // NEARBY ITEMS
 var ItemList = function() {
-    var itemButton = $( '#main-itemlist' ).children();
+    // overrides the native inventory() in script.js
+    var overrideNativeItemsFun = function() {
+        loadLocationItems = function() {
 
-    var init = function() {
-        // Get rid of current onClick behavior
-        itemButton.attr( 'onclick', "");
+            closeAllPagePopups();
+            closeAllPopups();
+            closeAllTooltips();
 
-        itemButton.attr( 'rel', "ajax_moveitems.jsp?preset=location");
+            pagePopup("ajax_moveitems.jsp?preset=location");
 
-        // Give sticky cluetip on click
-        itemButton.cluetip({
-            cluetipClass: 'rounded',
-            activation : 'click',
-            showTitle: true,
-            height: 'auto',
-            width: 350,
-            sticky: true,
-            closePosition: 'title',
-            arrows: true,
-            ajaxCache: false,
-            mouseOutClose: false,
-            cluezIndex: 2000000,
-            onShow: function(e) {
-                $("#cluetip-waitimage").css('z-index', 2000000);
-                $("#cluetip").css('z-index', 2000000);
-                return true;
-            },
-            ajaxProcess : function(data) {
-                var text = itemParser(data);
-                var textArray = divSeparate(text);
-                var newText = "";
-
-                for( var i = 0; i < textArray.length - 2; i++) {
-                    newText = newText.concat(textArray[i].pop());
-                    newText = newText.concat("<br>");
-                }
-                // add that last div back in
-                newText = newText.concat(textArray[textArray.length - 1]);
-
-                return newText;
-            }
-        });
+            // run function seconds after pageload
+            var timerID = setTimeout(function() {
+                modifyContents();
+                clearTimeout(timerID);
+                }, 1000*1);
+        }
     };
 
-    // Parse the HTML data before sending it back to ajaxProcess
-    //     this will only return the items on the ground in nearby area
-    function itemParser(text) {
-        var returnText = text;
-        returnText = returnText.replace(/<(script|style|title)[^<]+<\/(script|style|title)>/gm,"").replace(/<(link|meta)[^>]+>/g,"");
-        returnText = returnText.slice(returnText.indexOf("id=\'right") + 11, returnText.length);
-        return returnText;
-    }
+    var modifyContents = function() {
+        var $nearbyItemsDiv = $( '#right' );
+        var textArray = $nearbyItemsDiv.html().split("<br>");
 
-    // Organizes duplicate items into a stack with most valuable items being on the top of the stack
-    // cluetip will pop the stacks of duplicate items from a stack (stack of dupe item stacks)
-    // Separates divs array into arrays of unique types of items
-    function divSeparate(text) {
-        var newText = text.split("<br>");
-        var uniqItemStack = new Array([]);
-        var uniqItemNameStack = [];
+        // last item is empty
+        textArray.pop();
 
-        // save the last entry from div organization
-        var lastDiv = newText.pop();
+        textArray = divSeparate(textArray);
+        var rightHTML = '';
 
-        uniqItemNameStack = getNames(newText);
-
-        // 2D array construction
-        uniqItemNameStack.forEach(function(entry, ind) {
-            uniqItemStack.push(new Array());
+        textArray.forEach(function(entry) {
+            var length = entry.length;
+            rightHTML += entry.pop() + '(' + length + ')';
+            rightHTML += '<br>';
         });
 
-        // foreach
-        newText.forEach(function(entry, ind) {
-            var itemNameBegLoc = entry.search("main-item-name\'>");
-            // exclude search string from result
-            itemNameBegLoc += "main-item-name\'>".length;
-            var itemNameEndLoc = entry.search("</div></a>");
-            var itemName = entry.substring(itemNameBegLoc, itemNameEndLoc);
-            var index = 0;
+        $nearbyItemsDiv.html(rightHTML);
+    };
 
-            // if item name is in uniqItemStackNames
-            // get index of uniqItemStackNames.equals(itemName)
-            index = getIndex(itemName);
+    // itemArray - array of html contents for each entry in Nearby Items (#right)
+    //
+    // returns arrays for each item name with each item in the appropriate array
+    //  ex: an array of (an array of swords, an array of shoes, an array of rapiers)
+    function divSeparate(itemArray) {
+        // separates out the name from the html for each item
+        var nameArray = itemArray.map(function(entry) {
+            var regexp = /name"\>((?:\w{0,15}\s*){0,10})\</;
+            var textArray = regexp.exec(entry);
 
-            // push the item onto the correct stack
-            uniqItemStack[index].push(entry);
+            return textArray[1];
         });
 
-        // push back on the lastDiv
-        uniqItemStack.push(lastDiv);
+        var uniqItemStack = [];
 
+        // filters out all duplicate names
+        var uniqItemNameStack = nameArray.slice().sort().filter(function(entry, ind, array) {
+            // true if i is 0 or entry different from previous
+            var returnBool = !ind || entry !== array[ind - 1]
+
+            if (returnBool) {
+                uniqItemStack.push(new Array());
+            }
+            return returnBool;
+        });
+
+        // add the itemHTML to the stack of that item's name
+        nameArray.forEach(function(itemName, itemInd) {
+            uniqItemNameStack.forEach(function(uniqName, uniqInd) {
+                if (uniqName === itemName) {
+                    uniqItemStack[uniqInd].push(itemArray[itemInd]);
+                }
+            });
+        });
         return uniqItemStack;
-
-        //Misc. Functions
-
-        // gets Index of value in array, if no value in the array returns -1
-        function getIndex(name) {
-            var index = -1;
-
-            uniqItemNameStack.forEach(function(entry, ind) {
-                if (name == entry) {
-                    index = ind;
-                }
-            });
-            return index;
-        }
-
-        function getNames(divStack) {
-            var itemNameStack = [];
-
-            divStack.forEach(function(entry, ind) {
-                var itemNameBegLoc = entry.search("main-item-name\'>");
-                // exclude search string from result
-                itemNameBegLoc += "main-item-name\'>".length;
-                var itemNameEndLoc = entry.search("</div></a>");
-                var itemName = entry.substring(itemNameBegLoc, itemNameEndLoc);
-                var boolAdd = true;
-
-                if (ind === 0) {
-                    itemNameStack.push(itemName);
-                } else {
-                    itemNameStack.forEach(function(entry) {
-                        if (itemName == entry) {
-                            boolAdd = false;
-                        }
-                    });
-                }
-
-                if (boolAdd && ind > 0) {
-                    itemNameStack.push(itemName);
-                }
-            });
-
-            return itemNameStack;
-        }
     }
+
+    var init = function() {
+        overrideNativeItemsFun();
+    };
 
     var oPublic = {
         init: init,
