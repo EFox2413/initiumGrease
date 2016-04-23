@@ -662,7 +662,7 @@ var ItemList = function() {
 
             pagePopup("ajax_moveitems.jsp?preset=location");
 
-            // run function seconds after pageload
+            // run function 1 second after loadLocationItems() is called
             var timerID = setTimeout(function() {
                 modifyContents();
                 clearTimeout(timerID);
@@ -670,6 +670,7 @@ var ItemList = function() {
         }
     };
 
+    // modifies the DOM with the new html
     var modifyContents = function() {
         var $nearbyItemsDiv = $( '#right' );
         var textArray = $nearbyItemsDiv.html().split("<br>");
@@ -685,33 +686,54 @@ var ItemList = function() {
 
         var rightHTML = '';
 
-        console.log(textArray);
 
         textArray.forEach(function(entry) {
-            console.log("TextArray entry: " + entry);
             var length = entry.length;
-            rightHTML += entry.pop() + '(' + length + ')';
+            var name = parseItemName(entry[0]).replace(' ', '');
+
+            rightHTML += entry.pop() + '<a class="hint" rel="#' +
+                name + 'Stack">(' + length + ')</a>';
             rightHTML += '<br>';
+            if (entry[0] != null) {
+                rightHTML += mkViewAllHiddenClueHTML(entry);
+            }
         });
 
         $nearbyItemsDiv.html(rightHTML);
     };
 
+    function mkViewAllHiddenClueHTML(itemStack) {
+        console.log("from mkViewAll " + itemStack[0]);
+        var name = parseItemName(itemStack[0]).replace(' ', '');
+        var htmlStr = '<div class="hiddenTooltip" id="' + name +
+            'Stack" style="display: none;">';
+        htmlStr += '<h5 style="margin-top:0px;">' + name + ' stack</h5>';
+
+        itemStack.forEach(function(entry) {
+            htmlStr += entry;
+        });
+
+        htmlStr += '</div>';
+        return htmlStr;
+    }
+
+    // sorts a list by alphabetic order using parseForQuality
     function sortByQuality(itemHTMLArray) {
         itemHTMLArray.sort(function(a, b) {
-            var aQual = parseForQuality(a);
-            var bQual = parseForQuality(b);
+            var aQual = parseItemQuality(a);
+            var bQual = parseItemQuality(b);
 
             if (aQual > bQual) {return 1;}
             if (bQual > aQual) {return -1;}
 
             return 0;
         });
-        console.log(itemHTMLArray);
         return itemHTMLArray;
     }
 
-    function parseForQuality(itemHTML) {
+    // parses html for item-quality string that comes after clue item-
+    //   changes epic to zepic so alphabetic sort works
+    function parseItemQuality(itemHTML) {
         var regexp = /clue\sitem-(\w*)/;
         var parsedTextArray = regexp.exec(itemHTML);
 
@@ -725,6 +747,14 @@ var ItemList = function() {
         return parsedTextArray[1];
     }
 
+    // parses html for the item's name
+    function parseItemName(itemHTML) {
+        console.log("from parseItem " + itemHTML);
+        var regexp = /name"\>((?:\w*\s*)*)\</;
+        var parsedTextArray = regexp.exec(itemHTML);
+        return parsedTextArray[1];
+    }
+
     // itemArray - array of html contents for each entry in Nearby Items (#right)
     //
     // returns arrays for each item name with each item in the appropriate array
@@ -733,10 +763,7 @@ var ItemList = function() {
         var uniqItemStack = [];
         // gets the item name from the html for each item
         var nameArray = itemArray.map(function(entry) {
-            var regexp = /name"\>((?:\w*\s*)*)\</;
-            var textArray = regexp.exec(entry);
-
-            return textArray[1];
+            return parseItemName(entry);
         });
 
         // filters out all duplicate names
@@ -765,6 +792,7 @@ var ItemList = function() {
         overrideNativeItemsFun();
     };
 
+    // public API
     var oPublic = {
         init: init,
     };
