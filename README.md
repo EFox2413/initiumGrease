@@ -13,7 +13,7 @@ Feature Status:
 -  :white_check_mark: Debuffs
 -  :white_check_mark: MuteChat
 -  :white_check_mark: TrackStats
--  :heavy_exclamation_mark: ItemList
+-  :white_check_mark: ItemList
 -  :warning: NoRefresh
 
 ## WeatherForecast
@@ -36,8 +36,7 @@ Mutes specificed playrs in the chatbox via command /mute <playername>
 Tracks your stats for each attack performed. Supports multiple characters.
 
 ## ItemList
-Displays the nearby items in a cluetip and stacks items of the same type.
-Currently does not sort by item-type.
+Displays the nearby items in a PagePopup, stacked on top of each other and sorted by quality. Clicking the number shown next to the top item shows the rest of the stack.
 
 ## NoRefresh
 Stops the page from refreshing everything on the page instead of just refreshing the changed elements.
