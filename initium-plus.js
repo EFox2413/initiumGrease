@@ -76,7 +76,7 @@ var Util = function() {
         }
     };
 
-    var version = '0.0.1.2';
+    var version = '0.0.1.3';
 
     // checks if current in-game time is night
     var checkNight = function() {
