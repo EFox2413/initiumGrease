@@ -666,7 +666,21 @@ var ItemList = function() {
             var timerID = setTimeout(function() {
                 modifyContents();
                 clearTimeout(timerID);
-                }, 1000*1);
+                }, 1000);
+        }
+
+        moveItem = function(event, itemId, newContainerKind, newContainerId) {
+            ajaxAction("ServletCharacterControl?type=moveItem&itemId=" + itemId +
+                "&destinationKey=" + newContainerKind + "_" + newContainerId,
+                event, function(){
+
+                reloadPagePopup(true);
+                // run function 1 second after loadLocationItems() is called
+                var timerID = setTimeout(function() {
+                    modifyContents();
+                    clearTimeout(timerID);
+                    }, 1000*1);
+            });
         }
     };
 
