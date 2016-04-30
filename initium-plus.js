@@ -960,6 +960,7 @@ var TrackStats = function() {
     function toggleCounter() {
         enabled = !enabled;
         var settings = JSON.parse( GM_getValue("initium_counter_settings", "[]") );
+
         settings.forEach(function(char) {
             if(char.name == characterName) {
                 char.enabled = enabled;
@@ -1025,7 +1026,7 @@ var TrackStats = function() {
                         var stats = dbLength+" ";
 
                         statsDiv.each(function( index ) {
-                            if ( index > 0  && index < 4) {
+                            if (index < 3) {
                                 stats += $( this ).text().split(" ")[0] + "  ";
                             }
                         });
