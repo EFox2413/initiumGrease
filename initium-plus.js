@@ -310,10 +310,8 @@ var StatDisplay = function() {
                 statsItems = $(data).find('.main-item-subnote');
 
                 statsItems.each(function( index ) {
-                    if ( index > 0 ) {
-                        charDiv.append( " <span style=\"font-size:small\"> " +
-                            statsID[index - 1] + ":" +  $( this ).text().split(" ")[0] + " </span>");
-                    }
+                    charDiv.append( " <span style=\"font-size:small\"> " +
+                        statsID[index] + ":" +  $( this ).text().split(" ")[0] + " </span>");
                 });
             }
         });
